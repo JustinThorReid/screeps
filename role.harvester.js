@@ -3,11 +3,11 @@ var moveTask = require("task.move");
 var roleHarvester = {
 
     /** @param {Creep} creep **/
-    run: function(creep) {
+    run: function(creep, sourceId) {
 	    if(creep.carry.energy < creep.carryCapacity) {
-	        var source = creep.pos.findClosestByRange(FIND_SOURCES);
-            if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                moveTask(creep, source.pos);
+	        var source = creep.room.find(FIND_SOURCES);
+            if(creep.harvest(source[sourceId]) == ERR_NOT_IN_RANGE) {
+                moveTask(creep, source[sourceId].pos);
             }
         }
         else {
