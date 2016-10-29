@@ -5,9 +5,9 @@ module.exports = function(creep, destPos) {
     // Do things while walking
     if(creep.carry.energy > 0) {
         var road = _.filter(creep.pos.look(), function (a) {
-            if(a['type'] === LOOK_STRUCTURES && a.structure.structureType == STRUCTURE_ROAD) {
+            if(a['type'] == LOOK_STRUCTURES && a.structure.structureType == STRUCTURE_ROAD) {
                 return true;
-            } else if(a['type'] === LOOK_CONSTRUCTION_SITES && a.constructionSite.structureType === STRUCTURE_ROAD) {
+            } else if(a['type'] == LOOK_CONSTRUCTION_SITES && a.constructionSite.structureType == STRUCTURE_ROAD) {
                 return true;
             }
         })[0];
