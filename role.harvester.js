@@ -19,7 +19,7 @@ var roleHarvester = {
             });
             if(targets.length > 0) {
                 if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    moveTask(creep, targets[0].pos);
+                    moveTask(creep, targets[0].pos, false, false, false);
                 }
             }
         }

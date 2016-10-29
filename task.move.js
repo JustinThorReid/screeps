@@ -1,7 +1,7 @@
 /**
  * Created by phatn on 10/29/2016.
  */
-module.exports = function(creep, destPos, inHurry=false) {
+module.exports = function(creep, destPos, inHurry=false, build=true, repair=true) {
     // Do things while walking
     if(!inHurry && creep.carry.energy > 0) {
         var road = _.filter(creep.pos.look(), function (a) {
