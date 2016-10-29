@@ -35,10 +35,11 @@ module.exports.loop = function () {
                 structure.energy < structure.energyCapacity;
         }
     });
-    var building = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES);
+    var constructionList = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES);
     var repairList = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
         filter: function(object){
-            return object.structureType === STRUCTURE_ROAD && (object.hits < object.hitsMax / 3);
+            return (object.structureType === STRUCTURE_ROAD && (object.hits < object.hitsMax / 3)) ||
+                (object.structureType === STRUCTURE_RAMPART && (object.hits < object.hitsMax / 3));
         } 
     });
 
@@ -48,9 +49,9 @@ module.exports.loop = function () {
             if(energyStorage.length) {
                 roleHarvester.run(creep);
             } else if(repairList.length) {
-                roleRepair.run(creep);
-            } else if(building.length) {
-                roleBuilder.run(creep);
+                roleRepair.run(creep, repairList);
+            } else if(constructionList.length) {
+                roleBuilder.run(creep, constructionList);
             } else {
                 roleUpgrader.run(creep);
             }
@@ -59,7 +60,7 @@ module.exports.loop = function () {
             roleUpgrader.run(creep);
         }
         if(creep.memory.role == 'builder') {
-            roleBuilder.run(creep);
+            roleBuilder.run(creep, constructionList);
         }
         if(creep.memory.role == 'attacker') {
             roleAttacker.run(creep);
