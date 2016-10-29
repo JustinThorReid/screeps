@@ -12,6 +12,9 @@ module.exports = function(creep, destPos) {
             }
         })[0];
 
+        if(road)
+            road = road[road['type']];
+
         // Start construction
         if(!road) {
             creep.pos.createConstructionSite(STRUCTURE_ROAD);
