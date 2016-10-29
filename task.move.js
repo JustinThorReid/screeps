@@ -1,9 +1,9 @@
 /**
  * Created by phatn on 10/29/2016.
  */
-module.exports = function(creep, destPos) {
+module.exports = function(creep, destPos, inHurry=false) {
     // Do things while walking
-    if(creep.carry.energy > 0) {
+    if(!inHurry && creep.carry.energy > 0) {
         var road = _.filter(creep.pos.look(), function (a) {
             if(a['type'] == LOOK_STRUCTURES && a.structure.structureType == STRUCTURE_ROAD) {
                 return true;
