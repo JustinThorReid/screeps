@@ -16,12 +16,13 @@ module.exports = function(creep, destPos) {
         if(!road) {
             creep.pos.createConstructionSite(STRUCTURE_ROAD);
             creep.build(creep.pos.look(LOOK_CONSTRUCTION_SITES)[0]);
-
+            return;
         }
 
         // Build roads
         else if(road instanceof ConstructionSite) {
             creep.build(road);
+            return;
         }
 
         // Repair road
