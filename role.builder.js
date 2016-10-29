@@ -11,6 +11,12 @@ var roleBuilder = {
 	    }
 
 	    if(creep.memory.building) {
+			var extensions = _.filter(constructionList, function(a) {
+				return a.structureType === STRUCTURE_EXTENSION;
+			});
+			if(extensions.length)
+				constructionList = extensions;
+
 	        var target = creep.pos.findClosestByRange(constructionList);
             if(target) {
                 if(creep.build(target) == ERR_NOT_IN_RANGE) {

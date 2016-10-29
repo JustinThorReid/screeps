@@ -17,7 +17,7 @@ module.exports.loop = function () {
 	//longRangeHarvester.manageLongRangeCreeps();
 
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
-    if(harvesters.length < 3) {
+    if(harvesters.length < 4) {
         var newName = Game.spawns['Spawn1'].createCreep([MOVE, WORK, WORK, CARRY], undefined, {role: 'harvester'});
         console.log('Spawning new harvester: ' + newName);
     }
@@ -43,13 +43,13 @@ module.exports.loop = function () {
         } 
     });
 
-    var source = 0;
+    var source = 1;
     for(var name in Game.creeps) {
         var creep = Game.creeps[name];
         if(creep.memory.role == 'harvester') {
             if(energyStorage.length) {
                 roleHarvester.run(creep, source);
-                source += 1;
+                source = 0;
             } else if(repairList.length) {
                 roleRepair.run(creep, repairList);
             } else if(constructionList.length) {
