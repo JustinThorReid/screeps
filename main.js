@@ -17,13 +17,13 @@ module.exports.loop = function () {
 	//longRangeHarvester.manageLongRangeCreeps();
 
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'harvester');
-    if(harvesters.length < 3) {
+    if(harvesters.length < 2) {
         var newName = Game.spawns['Spawn1'].createCreep([MOVE,WORK,CARRY], undefined, {role: 'harvester'});
         console.log('Spawning new harvester: ' + newName);
     }
     
     var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
-    if(harvesters.length < 3) {
+    if(harvesters.length < 4) {
         var newName = Game.spawns['Spawn1'].createCreep([MOVE,WORK,CARRY], undefined, {role: 'upgrader'});
         console.log('Spawning new upgrader: ' + newName);
     }
