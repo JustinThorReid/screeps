@@ -23,13 +23,13 @@ module.exports = function(creep, destPos, inHurry=false, build=true, repair=true
         }
 
         // Build roads
-        else if(road instanceof ConstructionSite) {
+        else if(build && road instanceof ConstructionSite) {
             creep.build(road);
             return;
         }
 
         // Repair road
-        else if(road.hits < road.hitsMax / 2 && creep.repair(road) === OK) {
+        else if(repair && road.hits < road.hitsMax / 2 && creep.repair(road) === OK) {
             return; // Can not move so quit now
         }
     }
