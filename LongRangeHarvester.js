@@ -134,7 +134,7 @@ actions[HYBRID] = (function(){
 		},
 
 		spawnNew: function(spawner, sourceMemDat, depositMemDat){
-			var hybridBodyTypes: [
+			var hybridBodyTypes = [
 				{
 					body:[MOVE,MOVE,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
 					energy:600
@@ -160,7 +160,7 @@ actions[HYBRID] = (function(){
 			});
 		},
 		spawnHauler: function(){
-			var HAULER: [
+			var HAULER = [
 				{
 					body:[MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
 					energy:500
@@ -266,7 +266,7 @@ actions[MINER] = (function(){
 
 		// sourceMemDat is source data from Memory (pos/id)
 		spawnNew: function(spawner, sourceMemDat) {
-			var minerBodyTypes: [{
+			var minerBodyTypes = [{
 				body:[MOVE,MOVE,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
 				energy:600
 			},{
