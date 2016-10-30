@@ -53,7 +53,7 @@ module.exports.loop = function () {
     if(Game.time % 100 === 0) {
         var repairList = _.map(Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
             filter: function (object) {
-                return (object.hits < object.hitsMax / 2);
+                return (object.hits < object.hitsMax / 2.5);
             }
         }), function (object) {
             return object.id;
