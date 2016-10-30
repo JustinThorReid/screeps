@@ -9,6 +9,6 @@
 
 module.exports = {
     run: function(creep) {
-        creep.moveTo(new RoomPosition(8, 10, 'E3S19'));
+        creep.moveTo(new RoomPosition(15, 2, 'E3S19'));
 	}
 };
