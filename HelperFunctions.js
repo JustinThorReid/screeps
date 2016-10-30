@@ -3,7 +3,7 @@
  */
 module.exports = {
     createRoads: function(startPos, endPos) {
-        var path = PathFinder.search(startPos, {
+        var path = new PathFinder().search(startPos, {
             pos:endPos,
             range:1
         });
