@@ -52,6 +52,7 @@ module.exports.loop = function () {
         });
         _.union([Memory.needsRepair, repairList]);
     }
+    console.log("Structures needing repair: "+Memory.needsRepair.length);
 
     var source = 0;
     for(var name in Game.creeps) {
