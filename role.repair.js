@@ -13,9 +13,9 @@ var roleBuilder = {
 	    }
 
 	    if(creep.memory.building) {
-			var roadToRepair = Memory.needsRepair[0];
+			var roadToRepair = Game.getObjectById(Memory.needsRepair[0]);
 			while(roadToRepair && roadToRepair.hits === roadToRepair.hitsMax) {
-				roadToRepair = Memory.needsRepair.pop();
+				roadToRepair = Game.getObjectById(Memory.needsRepair.pop());
 			}
 			if(!roadToRepair)
 				return;

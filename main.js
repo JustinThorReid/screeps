@@ -51,12 +51,14 @@ module.exports.loop = function () {
     var constructionList = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES);
 
     if(Game.time % 100 === 0) {
-        var repairList = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
+        var repairList = _.map(Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
             filter: function (object) {
                 return (object.hits < object.hitsMax / 2);
             }
+        }), function (object) {
+            return object.id;
         });
-        _.union([Memory.needsRepair, repairList]);
+        Memory.needsRepair = _.union(Memory.needsRepair, repairList);
     }
 
 
