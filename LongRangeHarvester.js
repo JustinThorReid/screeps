@@ -293,7 +293,7 @@ actions[MINER] = (function(){
 
 module.exports = {
 	manageLongRangeCreeps: function() {
-		var spawner = Game.spawners['Spawn1'];
+		var spawner = Game.spawns['Spawn1'];
 		var longRangeCreeps = _.filter(Game.creeps, (creep) => creep.memory.role == 'LongRangeHarvester');
 
 		if(longRangeCreeps.length < 3) {
