@@ -3,18 +3,17 @@
  */
 module.exports = {
     createRoads: function(startPos, endPos) {
-        var path = new PathFinder().search(startPos, {
+        var path = PathFinder.search(startPos, {
             pos:endPos,
             range:1
+        },{
+            plainCost: 2,
+            swampCost: 20
         });
 
-        for(var n in path) {
-            var pos = path[n];
-            var room = Game.rooms[pos.roomName];
-
-            if(room) {
-                room.createConstructionSite(STRUCTURE_ROAD);
-            }
+        for(var n in path.path) {
+            var pos = path.path[n];
+            pos.createConstructionSite(STRUCTURE_ROAD);
         }
     }
 };

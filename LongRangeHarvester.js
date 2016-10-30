@@ -1,8 +1,5 @@
 var moveTask = require("task.move");
 
-var MODE_DEPOSIT_ENERGY = 0;
-var MODE_COLLECT_ENERGY = 1;
-
 // Hardcoded resource nodes
 var resourceNodes = {
 'W37S39_16_16':{
@@ -80,83 +77,239 @@ var roomPathing = function(sourceName, destName) {
 }
 */
 
-var bodyList = [
-	{
-		body:[MOVE,MOVE,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
-		energy:600
-	},
-	{
-		body:[MOVE,MOVE,WORK,CARRY,CARRY,CARRY],
-		energy:350
-	},
-	{
-		body:[MOVE,MOVE,WORK,CARRY,CARRY],
-		energy:300
-	}
-];
-var factory = function(){
+var HYBRID = "HYBRID";
+var MINER = "MINER";
+var HAULER = "HAULER";
+var actions = {};
+
+function findBestBody(spawner, bodyList) {
 	var body = [];
-	var cap = Game.spawns['Spawn1'].energyCapacity;
-	for(var i = 0; i < bodyList.length; i++) {
+	var cap = spawner.energyCapacity;
+	for (var i = 0; i < bodyList.length; i++) {
 		body = bodyList[i].body;
-		if(cap >= bodyList[i].energy)
+		if (cap >= bodyList[i].energy)
 			break;
 	}
 
-	var creepName = Game.spawns['Spawn1'].createCreep(body, undefined, {
-		role: 'LongRangeHarvester',
-		currentTask: MODE_COLLECT_ENERGY,
-		depositTarget:{
-			pos:new RoomPosition(25, 32, 'E3S18'),
-			id:'55c34a6b5be41a0a6e80c1d8'
-		},
-		collectTarget:{
-			pos:new RoomPosition(32, 28, 'E2S18'),
-			id:'55c34a6b5be41a0a6e80bcef'
-		}
-	});
-};
+	return body;
+}
 
-var depositEnergy = function (creep) {
-	// Ran out of energy, can't deposit
-	if(creep.carry.energy == 0) {
-		creep.memory.currentTask = MODE_COLLECT_ENERGY;
-		return;
-	}
+/// Hybrid actions
+actions[HYBRID] = (function(){
+	var MODE_DEPOSIT_ENERGY = 0;
+	var MODE_COLLECT_ENERGY = 1;
 
-	var target = Game.getObjectById(creep.memory.depositTarget.id);
-	var err = creep.transfer(target, RESOURCE_ENERGY);
-	if(err === ERR_NOT_IN_RANGE){
-		moveTask(creep, target.pos);
-	}
-};
-var collectEnergy = function (creep) {
-	// Ran out of energy, can't deposit
-	if(creep.carry.energy == creep.carryCapacity) {
-		creep.memory.currentTask = MODE_DEPOSIT_ENERGY;
-		return;
-	}
-	var target = Game.getObjectById(creep.memory.collectTarget.id);
-	if(!target || creep.harvest(target) == ERR_NOT_IN_RANGE) {
-		moveTask(creep, new RoomPosition(creep.memory.collectTarget.pos.x, creep.memory.collectTarget.pos.y, creep.memory.collectTarget.pos.roomName));
-	}
-};
-
-module.exports = {
-	manageLongRangeCreeps: function() {
-		var longRangeCreeps = _.filter(Game.creeps, (creep) => creep.memory.role == 'LongRangeHarvester');
-		if(longRangeCreeps.length < 3) {
-			factory();
+	var depositEnergy = function (creep) {
+		// Ran out of energy, can't deposit
+		if(creep.carry.energy == 0) {
+			creep.memory.currentTask = MODE_COLLECT_ENERGY;
+			return;
 		}
 
-		for(var name in longRangeCreeps) {
-			var creep = longRangeCreeps[name];
+		var target = Game.getObjectById(creep.memory.depositTarget.id);
+		var err = creep.transfer(target, RESOURCE_ENERGY);
+		if(err === ERR_NOT_IN_RANGE){
+			moveTask(creep, target.pos);
+		}
+	};
+	var collectEnergy = function (creep) {
+		// Ran out of energy, can't deposit
+		if(creep.carry.energy == creep.carryCapacity) {
+			creep.memory.currentTask = MODE_DEPOSIT_ENERGY;
+			return;
+		}
+		var target = Game.getObjectById(creep.memory.collectTarget.id);
+		if(!target || creep.harvest(target) == ERR_NOT_IN_RANGE) {
+			moveTask(creep, new RoomPosition(creep.memory.collectTarget.pos.x, creep.memory.collectTarget.pos.y, creep.memory.collectTarget.pos.roomName));
+		}
+	};
 
+	return {
+		run: function(creep) {
 			if(creep.memory.currentTask === MODE_DEPOSIT_ENERGY) {
 				depositEnergy(creep);
 			} else {
 				collectEnergy(creep);
 			}
+		},
+
+		spawnNew: function(spawner, sourceMemDat, depositMemDat){
+			var hybridBodyTypes: [
+				{
+					body:[MOVE,MOVE,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
+					energy:600
+				},
+				{
+					body:[MOVE,MOVE,WORK,CARRY,CARRY,CARRY],
+					energy:350
+				},
+				{
+					body:[MOVE,MOVE,WORK,CARRY,CARRY],
+					energy:300
+				}
+			];
+
+			var body = findBestBody(spawner, hybridBodyTypes);
+
+			var creepName = spawner.createCreep(body, undefined, {
+				role: 'LongRangeHarvester',
+				subrole: HYBRID,
+				currentTask: MODE_COLLECT_ENERGY,
+				depositTarget: depositMemDat,
+				collectTarget: sourceMemDat
+			});
+		},
+		spawnHauler: function(){
+			var HAULER: [
+				{
+					body:[MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
+					energy:500
+				},
+				{
+					body:[MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
+					energy:450
+				},
+				{
+					body:[MOVE,MOVE,CARRY,CARRY,CARRY,CARRY],
+					energy:300
+				}
+				];
+		}
+	};
+})();
+
+// Steps for a miner that is at a mining site
+actions[MINER] = (function(){
+	var actionWhenInPosition = function(creep) {
+		if(creep.carry.energy < creep.carryCapacity) {
+			var source = Game.getObjectById(creep.memory.collectTarget.id);
+			creep.harvest(source);
+		} else {
+			var target = Game.structures[creep.memory.depositTarget.id];
+
+			if(target) {
+				if(target.hits < target.hitsMax/3) {
+					creep.repair(target);
+				} else {
+					creep.transfer(target, RESOURCE_ENERGY);
+				}
+			} else {
+				target = Game.constructionSites[creep.memory.depositTarget.id];
+
+				if(target) {
+					creep.build(target);
+				} else {
+					creep.pos.createConstructionSite(STRUCTURE_CONTAINER);
+					creep.memory.depositTarget.id = creep.pos.lookFor(LOOK_CONSTRUCTION_SITES);
+				}
+			}
+		}
+	};
+
+	var moveToDesiredPosition = function(creep){
+		if(creep.memory.desiredPosition){
+			var destPos = new RoomPosition(creep.memory.desiredPosition.x, creep.memory.desiredPosition.y, creep.memory.desiredPosition.roomName);
+
+			if(creep.pos.isEqualTo(destPos)){
+				creep.memory.inPosition = true;
+				delete creep.memory.desiredPosition;
+			} else {
+				creep.moveTo(destPos);
+			}
+		} else {
+			var source = Game.getObjectById(creep.memory.collectTarget.id);
+			if (source) {
+				var allObjects = source.room.lookAtArea(source.pos.y-1, source.pos.x-1, source.pos.y+1, source.pos.x+1, true);
+				var containers = _.filter(allObjects, function (a) {
+					return (a['type'] == LOOK_STRUCTURES && a.structure.structureType == STRUCTURE_CONTAINER) ||
+						(a['type'] == LOOK_CONSTRUCTION_SITES && a.constructionSite.structureType == STRUCTURE_CONTAINER);
+				});
+
+				if(containers.length) {
+					containers = containers[0][containers[0]['type']];
+					creep.memory.desiredPosition = containers.pos;
+					creep.memory.depositTarget.id = containers.id;
+				} else {
+					var goodTerrain = _.filter(allObjects, function (a) {
+						return (a['type'] == LOOK_TERRAIN && a[LOOK_TERRAIN] !== "wall");
+					});
+
+					var structures = source.room.lookForAt(LOOK_STRUCTURES, goodTerrain[0].x, goodTerrain[0].y);
+					for(var i in structures) {
+						structures[i].destroy();
+					}
+					var constructionSites = source.room.lookForAt(LOOK_CONSTRUCTION_SITES, goodTerrain[0].x, goodTerrain[0].y);
+					for(var i in constructionSites) {
+						constructionSites[i].destroy();
+					}
+
+					source.room.createConstructionSite(goodTerrain[0].x, goodTerrain[0].y, STRUCTURE_CONTAINER);
+					var depositObject = source.room.lookForAt(LOOK_CONSTRUCTION_SITES, goodTerrain[0].x, goodTerrain[0].y)[0][LOOK_CONSTRUCTION_SITES];
+
+					creep.memory.desiredPosition = depositObject.pos;
+					creep.memory.depositTarget.id = depositObject;
+				}
+			} else {
+				creep.moveTo(new RoomPosition(creep.memory.collectTarget.pos.x, creep.memory.collectTarget.pos.y, creep.memory.collectTarget.pos.roomName));
+			}
+		}
+	};
+
+	return {
+		run: function(creep) {
+			if(creep.memory.inPosition === true) {
+				actionWhenInPosition(creep);
+			} else {
+				moveToDesiredPosition(creep);
+			}
+		},
+
+		// sourceMemDat is source data from Memory (pos/id)
+		spawnNew: function(spawner, sourceMemDat) {
+			var minerBodyTypes: [{
+				body:[MOVE,MOVE,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
+				energy:600
+			},{
+				body:[MOVE,WORK,WORK,WORK,CARRY],
+				energy:400
+			},{
+				// Will have to dump on ground
+				body:[MOVE,WORK,WORK],
+				energy:250
+			}];
+
+			var body = findBestBody(spawner, minerBodyTypes);
+
+			var creepName = spawner.createCreep(body, undefined, {
+				role: 'LongRangeHarvester',
+				subrole: MINER,
+				collectTarget: sourceMemDat,
+				depositTarget:{}
+			});
+		}
+	}
+})();
+
+
+module.exports = {
+	manageLongRangeCreeps: function() {
+		var spawner = Game.spawners['Spawn1'];
+		var longRangeCreeps = _.filter(Game.creeps, (creep) => creep.memory.role == 'LongRangeHarvester');
+
+		if(longRangeCreeps.length < 3) {
+			actions[HYBRID].spawnNew(spawner, {
+				pos: new RoomPosition(32, 28, 'E2S18'),
+				id: '55c34a6b5be41a0a6e80bcef'
+			},{
+				pos: new RoomPosition(25, 32, 'E3S18'),
+				id: '55c34a6b5be41a0a6e80c1d8'
+			});
+		}
+
+		for(var name in longRangeCreeps) {
+			var creep = longRangeCreeps[name];
+
+			actions[creep.memory.subrole].run(creep);
 	    }
 	},
 	

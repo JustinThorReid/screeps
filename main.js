@@ -22,10 +22,16 @@ module.exports.loop = function () {
         console.log('Spawning new harvester: ' + newName);
     }
     
-    var harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
-    if(harvesters.length < 4) {
+    var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
+    if(upgraders.length < 4) {
         var newName = Game.spawns['Spawn1'].createCreep([MOVE, WORK, WORK, CARRY], undefined, {role: 'upgrader'});
         console.log('Spawning new upgrader: ' + newName);
+    }
+
+    var attackers = _.filter(Game.creeps, (creep) => creep.memory.role == 'attacker');
+    if(attackers.length < 1) {
+        var newName = Game.spawns['Spawn1'].createCreep([MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK], undefined, {role: 'attacker'});
+        console.log('Spawning new attacker: ' + newName);
     }
 
     // Check if spawn needs refilling first
