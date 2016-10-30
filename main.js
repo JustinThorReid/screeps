@@ -6,7 +6,7 @@ var longRangeHarvester = require('LongRangeHarvester');
 var roleAttacker = require('attacker');
 
 module.exports.loop = function () {
-
+    var originalRepairLen = Memory.needsRepair.length;
 	// Old memory cleanup
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
@@ -52,7 +52,7 @@ module.exports.loop = function () {
         });
         _.union([Memory.needsRepair, repairList]);
     }
-    console.log("Structures needing repair: "+Memory.needsRepair.length);
+
 
     var source = 0;
     for(var name in Game.creeps) {
@@ -79,4 +79,7 @@ module.exports.loop = function () {
             roleAttacker.run(creep);
         }
     }
+
+    if(originalRepairLen !== Memory.needsRepair.length)
+        console.log("Structures needing repair: "+Memory.needsRepair.length);
 }
