@@ -30,7 +30,7 @@ module.exports.loop = function () {
     }
 
     var attackers = _.filter(Game.creeps, (creep) => creep.memory.role == 'attacker');
-    if(attackers.length < 1) {
+    if(attackers.length < 2) {
         var newName = Game.spawns['Spawn1'].createCreep([MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK], undefined, {role: 'attacker'});
         console.log('Spawning new attacker: ' + newName);
     }
@@ -43,12 +43,15 @@ module.exports.loop = function () {
         }
     });
     var constructionList = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES);
-    var repairList = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
-        filter: function(object){
-            return (object.structureType === STRUCTURE_ROAD && (object.hits < object.hitsMax / 3)) ||
-                (object.structureType === STRUCTURE_RAMPART && (object.hits < object.hitsMax / 3));
-        } 
-    });
+
+    if(Game.time % 100 === 0) {
+        var repairList = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
+            filter: function (object) {
+                return (object.hits < object.hitsMax / 2);
+            }
+        });
+        _.union([Memory.needsRepair, repairList]);
+    }
 
     var source = 0;
     for(var name in Game.creeps) {
@@ -57,8 +60,8 @@ module.exports.loop = function () {
             if(energyStorage.length) {
                 roleHarvester.run(creep, source);
                 source = 1;
-            } else if(repairList.length) {
-                roleRepair.run(creep, repairList);
+            } else if(Memory.needsRepair.length) {
+                roleRepair.run(creep);
             } else if(constructionList.length) {
                 roleBuilder.run(creep, constructionList);
             } else {

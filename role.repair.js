@@ -1,7 +1,7 @@
 var roleBuilder = {
 
     /** @param {Creep} creep **/
-    run: function(creep, repairList) {
+    run: function(creep) {
 
 	    if(creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
@@ -13,7 +13,12 @@ var roleBuilder = {
 	    }
 
 	    if(creep.memory.building) {
-            var roadToRepair = creep.pos.findClosestByRange(repairList);
+			var roadToRepair = Memory.needsRepair[0];
+			while(roadToRepair && roadToRepair.hits === roadToRepair.hitsMax) {
+				roadToRepair = Memory.needsRepair.pop();
+			}
+			if(!roadToRepair)
+				return;
             
             if(creep.repair(roadToRepair) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(roadToRepair);
