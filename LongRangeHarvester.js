@@ -1,24 +1,7 @@
-// long distance on roads - carry costs less could add 1 more carry with extensions
-//[MOVE,MOVE,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY]
+var moveTask = require("task.move");
 
-
-
-
-/*
-Moving
-- Follow path
-- - If stuck, replace pathcopy with new path
-- Repair roads
-
-Dump into dest
-- deposit until empty
-- path to exit
-
-Harvest until full
-*/
-var MODE_HARVEST = 'MODE_HARVEST';
-var MODE_MOVE = 'MODE_MOVE';
-var MODE_DUMP = 'MODE_DUMP';
+var MODE_DEPOSIT_ENERGY = 0;
+var MODE_COLLECT_ENERGY = 1;
 
 // Hardcoded resource nodes
 var resourceNodes = {
@@ -47,6 +30,7 @@ var roomNavGraph = {
 	}
 };
 
+/*
 // Does not handle loops in the room graph
 // Does not have room costs
 // Stops at first path found
@@ -94,128 +78,85 @@ var roomPathing = function(sourceName, destName) {
 	
 	console.log("LongRangeHarvester: Error on room pathing, no path found " + sourceName + " -> " + destName);
 }
+*/
 
-var moveCreepToNode = function(creep, pos, range = 1){
-	creep.memory.mode = MODE_MOVE;
-	creep.memory.dest = pos;
-	creep.memory.destRange = range;
-	creep.memory.path = undefined;
-};
-
-// double check you are in the right place?
-var doneMoving = function(creep) {
-	if(creep.carry.energy > 0) {	
-		creep.memory.mode = MODE_DUMP;
-	} else {
-		creep.memory.mode = MODE_HARVEST;
-	}
-}
-
-var modeLogic = {
-	'MODE_HARVEST' : function(creep) {
-		var resourceNode = resourceNodes[creep.memory.assignedNode];
-		
-		if(creep.harvest(resourceNode.pos.lookFor(LOOK_SOURCES)[0]) == ERR_NOT_IN_RANGE) {
-			console.log("LongRangeHarvester: Tried to harvest but was not in range! node - " + creep.memory.assignedNode);
-			moveCreepToNode(creep, resourceNode.pos);
-		} else if(creep.carry.energy >= creep.carryCapacity) {
-			moveCreepToNode(creep, creep.memory.dumpTarget.pos, creep.memory.dumpTarget.minDist);
-        }
+var bodyList = [
+	{
+		body:[MOVE,MOVE,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
+		energy:600
 	},
-	
-	'MODE_MOVE': function(creep) {		
-		if(creep.pos.roomName === creep.memory.dest.roomName && creep.pos.getRangeTo(creep.memory.dest.x, creep.memory.dest.y) <= creep.memory.destRange){	
-			doneMoving(creep);
-			return;
-		} else if(creep.pos.roomName === creep.memory.dest.roomName) {
-			creep.memory.path = creep.pos.findPathTo(creep.memory.dest.x, creep.memory.dest.y);
-		}
-	
-		if(!creep.memory.path || creep.memory.path.length === 0) {
-			var localDest;
-			if(creep.pos.roomName === creep.memory.dest.roomName) {
-				localDest = creep.memory.dest;
-			} else {
-				// Room level pathing (might not be able to see inside)
-				var nextRoom = roomPathing(creep.pos.roomName, creep.memory.dest.roomName);
-				localDest = roomNavGraph[creep.pos.roomName][nextRoom];									
-			}
-			
-			creep.say('goto ' + localDest.x + "," + localDest.y);
-			creep.memory.path = creep.pos.findPathTo(localDest.x, localDest.y);
-		}
-		
-		// Check current pos for roads needing repair
-		if(creep.carry.energy > 0) {
-			var road = _.filter(creep.pos.lookFor(LOOK_STRUCTURES), function (a) { return a instanceof StructureRoad;})[0];
-			if(road && road.hits < road.hitsMax / 3 && creep.repair(road) == OK) {
-				if(creep.carry.energy === 0) {
-					doneMoving(creep);
-				}
-				return;
-			}				
-		}
-		
-		if(creep.moveByPath(creep.memory.path) == ERR_NOT_FOUND){
-			creep.memory.path = undefined;
-		}		
+	{
+		body:[MOVE,MOVE,WORK,CARRY,CARRY,CARRY],
+		energy:350
 	},
-	
-	'MODE_DUMP':function(creep){
-		if(creep.carry.energy === 0) {
-			moveCreepToNode(creep, resourceNodes[creep.memory.assignedNode].pos);
-			return;
-		}
-		
-		var target = Game.getObjectById(creep.memory.dumpTarget.id);
-		if(target instanceof StructureController) {
-			if(creep.upgradeController(target) == ERR_NOT_IN_RANGE) {
-				console.log("LongRangeHarvester: Tried to upgrade but was not in range!");
-			}
-		} else {
-			var err = creep.transfer(target, RESOURCE_ENERGY);
-			if(err === ERR_NOT_IN_RANGE || err === ERR_INVALID_TARGET){
-				console.log("LongRangeHarvester: Tried to transfer with error! " + err);
-			}
-        }
+	{
+		body:[MOVE,MOVE,WORK,CARRY,CARRY],
+		energy:300
 	}
-};
+];
+var factory = function(){
+	var body = [];
+	var cap = Game.spawns['Spawn1'].energyCapacity;
+	for(var i = 0; i < bodyList.length; i++) {
+		body = bodyList[i].body;
+		if(cap >= bodyList[i].energy)
+			break;
+	}
 
-var factory = function(nodeName){
-	var resourceNode = resourceNodes[nodeName];		
-	var creepName = Game.spawns['Spawn1'].createCreep([MOVE,MOVE,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY], undefined, {
+	var creepName = Game.spawns['Spawn1'].createCreep(body, undefined, {
 		role: 'LongRangeHarvester',
-		mode: MODE_MOVE,
-		assignedNode:nodeName,
-		dumpTarget:{
-			pos:new RoomPosition(19, 13, 'W37S38'),
-			minDist:3,
-			id:'576a9ba357110ab231d87a28'
+		currentTask: MODE_COLLECT_ENERGY,
+		depositTarget:{
+			pos:new RoomPosition(25, 32, 'E3S18'),
+			id:'55c34a6b5be41a0a6e80c1d8'
+		},
+		collectTarget:{
+			pos:new RoomPosition(32, 28, 'E2S18'),
+			id:'55c34a6b5be41a0a6e80bcef'
 		}
 	});
-	moveCreepToNode(Game.creeps[creepName], resourceNode.pos);
+};
+
+var depositEnergy = function (creep) {
+	// Ran out of energy, can't deposit
+	if(creep.carry.energy == 0) {
+		creep.memory.currentTask = MODE_COLLECT_ENERGY;
+		return;
+	}
+
+	var target = Game.getObjectById(creep.memory.depositTarget.id);
+	var err = creep.transfer(target, RESOURCE_ENERGY);
+	if(err === ERR_NOT_IN_RANGE){
+		moveTask(creep, target.pos);
+	}
+};
+var collectEnergy = function (creep) {
+	// Ran out of energy, can't deposit
+	if(creep.carry.energy == creep.carryCapacity) {
+		creep.memory.currentTask = MODE_DEPOSIT_ENERGY;
+		return;
+	}
+	var target = Game.getObjectById(creep.memory.collectTarget.id);
+	if(!target || creep.harvest(target) == ERR_NOT_IN_RANGE) {
+		moveTask(creep, new RoomPosition(creep.memory.collectTarget.pos.x, creep.memory.collectTarget.pos.y, creep.memory.collectTarget.pos.roomName));
+	}
 };
 
 module.exports = {
 	manageLongRangeCreeps: function() {
-		// Clean up
-		if(Game.time % 250 === 0) {
-			// Create creeps for nodes that are missing them
-			for(var sourceName in resourceNodes) {
-				var assignedCreeps = _.filter(Game.creeps, (creep) => creep.memory.role === 'LongRangeHarvester' && creep.memory.assignedNode === sourceName);
-				var needed = resourceNodes[sourceName].creepsNeeded - assignedCreeps.length;
-				
-				if(needed > 0) {
-					factory(sourceName);
-				}
-			}
-		}
-		
 		var longRangeCreeps = _.filter(Game.creeps, (creep) => creep.memory.role == 'LongRangeHarvester');
+		if(longRangeCreeps.length < 3) {
+			factory();
+		}
+
 		for(var name in longRangeCreeps) {
 			var creep = longRangeCreeps[name];
-			
-			modeLogic[creep.memory.mode](creep);
+
+			if(creep.memory.currentTask === MODE_DEPOSIT_ENERGY) {
+				depositEnergy(creep);
+			} else {
+				collectEnergy(creep);
+			}
 	    }
 	},
 	
