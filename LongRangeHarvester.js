@@ -311,7 +311,5 @@ module.exports = {
 
 			actions[creep.memory.subrole].run(creep);
 	    }
-	},
-	
-	m:factory
+	}
 };
