@@ -3,6 +3,7 @@ var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var roleRepair = require('role.repair');
 var longRangeHarvester = require('LongRangeHarvester');
+var roleAttacker = require('attacker');
 
 module.exports.loop = function () {
 
