@@ -24,7 +24,7 @@ module.exports.loop = function () {
     }
     
     var upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == 'upgrader');
-    if(upgraders.length < 4) {
+    if(upgraders.length < 3) {
         var newName = Game.spawns['Spawn1'].createCreep([MOVE,MOVE,WORK,WORK,WORK,CARRY], undefined, {role: 'upgrader'});
         console.log('Spawning new upgrader: ' + newName);
     }
@@ -33,6 +33,12 @@ module.exports.loop = function () {
     if(attackers.length < 2) {
         var newName = Game.spawns['Spawn1'].createCreep([MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK], undefined, {role: 'attacker'});
         console.log('Spawning new attacker: ' + newName);
+    }
+
+    var builders = _.filter(Game.creeps, (creep) => creep.memory.role == 'builder');
+    if(builders.length < 2) {
+        var newName = Game.spawns['Spawn1'].createCreep([MOVE,MOVE,WORK,WORK,WORK,CARRY], undefined, {role: 'builder'});
+        console.log('Spawning new builder: ' + newName);
     }
 
     // Check if spawn needs refilling first
