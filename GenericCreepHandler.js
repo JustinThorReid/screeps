@@ -206,6 +206,11 @@ tasks[TASK_DEPOSIT] = {
             creep.memory.subrole = undefined;
             return true; // Done with task
         }
+
+        if(creep.carry.energy == 0) {
+            creep.memory.subrole = undefined;
+            return true; // Done with task
+        }
     },
     count: 0
 };
