@@ -336,6 +336,8 @@ module.exports = {
             tasks[subrole].count++;
             tasks[subrole].init(creep);
             tasks[subrole].run(creep);
+
+            creep.say(subrole);
         });
     }
 }
