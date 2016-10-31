@@ -296,12 +296,11 @@ module.exports = {
         _.each(Game.spawns['Spawn1'].room.find(FIND_STRUCTURES), function (object) {
            if((object.structureType == STRUCTURE_EXTENSION || object.structureType == STRUCTURE_SPAWN) && object.energy < object.energyCapacity) {
                spawnStorageList.push(object);
-           } else if(object instanceof ConstructionSite) {
-               constructionList.push(object);
            } else if(object.hits < object.hitsMax / 2.5 && object.hits < MAX_REPAIR_HITS) {
                repairList.push(object);
            }
         });
+        constructionList = Game.spawns['Spawn1'].room.find(FIND_MY_CONSTRUCTION_SITES);
 
         var controller = Game.spawns['Spawn1'].room.controller;
         var highestPriorityConstruction = tasks[TASK_BUILD].findHighestPriority(constructionList);
