@@ -317,9 +317,11 @@ module.exports = {
 
             var repairObj = Game.getObjectById(Memory.needsRepair[0]);
             while(repairObj && (repairObj.hits === repairObj.hitsMax || repairObj.hits > MAX_REPAIR_HITS)) {
-                repairObj = Game.getObjectById(Memory.needsRepair.pop());
+                Memory.needsRepair.pop();
+                repairObj = Game.getObjectById(Memory.needsRepair[0]);
             }
         }
+
 
         // Handle creeps
         var untaskedCreeps = [];
