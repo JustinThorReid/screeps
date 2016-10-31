@@ -175,17 +175,16 @@ tasks[TASK_BUILD] = {
     },
     init: function(creep) {
         creep.memory.subrole = TASK_BUILD;
-        creep.memory.targetBuilding = highestPriorityConstruction.id;
     },
     run: function (creep){
-        var target = Game.getObjectById(creep.memory.targetBuilding);
+        var target = Game.getObjectById(Memory.highestPriorityConstructionId);
         if(target && target instanceof ConstructionSite) {
             if(creep.build(target) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
             }
         } else {
             creep.memory.subrole = undefined;
-            creep.memory.targetBuilding = undefined;
+            Memory.highestPriorityConstructionId = undefined;
             return true; // Done with task
         }
     },
@@ -247,7 +246,6 @@ assign rest to upgrade
  */
 
 var MAX_REPAIR_HITS = 300000;
-var highestPriorityConstruction = undefined;
 
 function findTask(creep) {
     if(creep.carry.energy == 0) {
@@ -273,7 +271,7 @@ function findTask(creep) {
         return TASK_REPAIR;
     }
 
-    if(highestPriorityConstruction) {
+    if(Memory.highestPriorityConstructionId) {
         return TASK_BUILD;
     }
 
@@ -291,7 +289,6 @@ module.exports = {
 
         // Build lists
         var spawnStorageList = [],
-            constructionList = [],
             repairList = [];
         _.each(Game.spawns['Spawn1'].room.find(FIND_STRUCTURES), function (object) {
            if((object.structureType == STRUCTURE_EXTENSION || object.structureType == STRUCTURE_SPAWN) && object.energy < object.energyCapacity) {
@@ -300,12 +297,12 @@ module.exports = {
                repairList.push(object);
            }
         });
-        constructionList = Game.spawns['Spawn1'].room.find(FIND_MY_CONSTRUCTION_SITES);
 
         var controller = Game.spawns['Spawn1'].room.controller;
-        var highestPriorityConstruction = tasks[TASK_BUILD].findHighestPriority(constructionList);
-        if(highestPriorityConstruction) {
-            console.log("Highest priority: " + highestPriorityConstruction.structureType);
+
+        if(Game.time % 11 === 0) {
+            var constructionList = Game.spawns['Spawn1'].room.find(FIND_MY_CONSTRUCTION_SITES);
+            Memory.highestPriorityConstructionId = tasks[TASK_BUILD].findHighestPriority(constructionList).id;
         }
 
         if(Game.time % 10 === 0) {
