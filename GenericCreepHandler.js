@@ -79,7 +79,7 @@ tasks[TASK_HARVEST] = {
         }
         //var slot = source.slots[Math.floor(Math.random() * source.slots.length)];
 
-        creep.memory.harvestId = source.id;
+        creep.memory.harvestId = sourceToUse.id;
         //creep.memory.harvestSlot = slot;
     },
 
