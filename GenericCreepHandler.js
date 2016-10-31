@@ -4,7 +4,7 @@
 var helperFunctions = require("HelperFunctions");
 var moveTask = require("task.move");
 
-var NEEDED_CREEPS = 8;
+var NEEDED_CREEPS = 5;
 var MIN_UPGRADING = 1; // must have 1 to keep from loosing the room
 
 var TASK_HARVEST = "TASK_HARVEST";
@@ -15,8 +15,14 @@ var TASK_DEPOSIT = "TASK_DEPOSIT";
 
 
 var GENERIC_BODIES = [{
-        body:[MOVE, MOVE, WORK, WORK, WORK, CARRY],
-        energy:450
+    body:[MOVE,MOVE,MOVE,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY],
+    energy:800
+},{
+    body:[MOVE, MOVE, WORK, WORK, WORK, CARRY],
+    energy:450
+},{
+    body:[MOVE,MOVE,WORK,CARRY,CARRY],
+    energy:300
 }];
 /*
 rooms = {
