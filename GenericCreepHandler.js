@@ -305,6 +305,9 @@ module.exports = {
 
         var controller = Game.spawns['Spawn1'].room.controller;
         var highestPriorityConstruction = tasks[TASK_BUILD].findHighestPriority(constructionList);
+        if(highestPriorityConstruction.id) {
+            console.log("Highest priority: " + highestPriorityConstruction.structureType);
+        }
 
         if(Game.time % 100 === 0) {
             var repairList = _.sortBy(repairList, ['hits']);
