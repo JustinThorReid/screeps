@@ -308,7 +308,7 @@ module.exports = {
             console.log("Highest priority: " + highestPriorityConstruction.structureType);
         }
 
-        if(Game.time % 100 === 0) {
+        if(Game.time % 10 === 0) {
             var repairList = _.sortBy(repairList, ['hits']);
             var repairList = _.map(repairList, function(object) {
                 return object.id;
