@@ -13,6 +13,11 @@ var TASK_REPAIR = "TASK_REPAIR";
 var TASK_BUILD = "TASK_BUILD";
 var TASK_DEPOSIT = "TASK_DEPOSIT";
 
+
+var GENERIC_BODIES = [{
+        body:[MOVE, MOVE, WORK, WORK, WORK, CARRY],
+        energy:450
+}];
 /*
 rooms = {
     "E1S1": [{
