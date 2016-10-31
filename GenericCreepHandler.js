@@ -257,14 +257,14 @@ function findTask(creep) {
     }
 
     if(creep.room.energyAvailable < creep.room.energyCapacityAvailable) {
-        var neededEnergy = creep.room.energyCapacityAvailable - creep.room.energyAvailable;
-        var bodyUsed = helperFunctions.findBestBody(creep.room, GENERIC_BODIES);
-        var energyPerCreep = _.countBy(bodyUsed)[CARRY] * 50;
-        var inRoute = energyPerCreep * tasks[TASK_DEPOSIT].count;
+        //var neededEnergy = creep.room.energyCapacityAvailable - creep.room.energyAvailable;
+        //var bodyUsed = helperFunctions.findBestBody(creep.room, GENERIC_BODIES);
+        //var energyPerCreep = _.countBy(bodyUsed)[CARRY] * 50;
+        //var inRoute = energyPerCreep * tasks[TASK_DEPOSIT].count;
 
-        if(creep.room.energyAvailable + inRoute < creep.room.energyCapacityAvailable){
+        //if(creep.room.energyAvailable + inRoute < creep.room.energyCapacityAvailable){
             return TASK_DEPOSIT;
-        }
+        //}
     }
 
     if(Memory.needsRepair.length > tasks[TASK_REPAIR].count) {
