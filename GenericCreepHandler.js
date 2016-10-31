@@ -264,7 +264,7 @@ function findTask(creep) {
         return TASK_REPAIR;
     }
 
-    if(highestPriorityConstruction) {
+    if(highestPriorityConstruction.id) {
         return TASK_BUILD;
     }
 
