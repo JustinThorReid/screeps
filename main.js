@@ -12,7 +12,7 @@ module.exports.loop = function () {
     }
 	
 	longRangeHarvester.manageLongRangeCreeps();
-    genericCreepHandler(_.filter(Game.creeps, (creep) => creep.memory.role == GenericCreepHandler.role));
+    genericCreepHandler(_.filter(Game.creeps, (creep) => creep.memory.role == genericCreepHandler.role));
 
     var attackers = _.filter(Game.creeps, (creep) => creep.memory.role == 'attacker');
     if(attackers.length < 2) {
