@@ -58,7 +58,7 @@ tasks[TASK_HARVEST] = {
          var sourceToUse = false;
          _.each(roomSources, function(source) {
              _.each(source.slots, function(slot) {
-                 if(!creep.room.lookForAt(LOOK_CREEP, slot.x, slot.y).length) {
+                 if(!creep.room.lookForAt(LOOK_CREEPS, slot.x, slot.y).length) {
                      sourceToUse = source;
                      return false; // break;
                  }
