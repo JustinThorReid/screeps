@@ -178,7 +178,7 @@ tasks[TASK_BUILD] = {
     },
     run: function (creep){
         var target = Game.getObjectById(Memory.highestPriorityConstructionId);
-        if(target && target instanceof ConstructionSite) {
+        if(target && target instanceof ConstructionSite && creep.carry.energy > 0) {
             if(creep.build(target) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
             }
@@ -301,11 +301,13 @@ module.exports = {
         var controller = Game.spawns['Spawn1'].room.controller;
 
         if(Game.time % 11 === 0) {
+            console.log("Recalc construction list");
             var constructionList = Game.spawns['Spawn1'].room.find(FIND_MY_CONSTRUCTION_SITES);
             Memory.highestPriorityConstructionId = tasks[TASK_BUILD].findHighestPriority(constructionList).id;
         }
 
         if(Game.time % 10 === 0) {
+            console.log("Recalc repairlist");
             var repairList = _.sortBy(repairList, ['hits']);
             var repairList = _.map(repairList, function(object) {
                 return object.id;

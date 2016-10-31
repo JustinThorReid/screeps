@@ -147,6 +147,7 @@ actions[HYBRID] = (function(){
 				depositTarget: depositMemDat,
 				collectTarget: sourceMemDat
 			});
+			console.log("Spawning new long range hybrid: " + creepName);
 		},
 		spawnHauler: function(){
 			var HAULER = [
