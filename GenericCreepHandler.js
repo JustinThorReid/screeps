@@ -79,7 +79,7 @@ tasks[TASK_HARVEST] = {
         }
         //var slot = source.slots[Math.floor(Math.random() * source.slots.length)];
 
-        creep.memory.harvestId = source.id;
+        creep.memory.harvestId = sourceToUse.id;
         //creep.memory.harvestSlot = slot;
     },
 
@@ -301,7 +301,7 @@ module.exports = {
         var highestPriorityConstruction = tasks[TASK_BUILD].findHighestPriority(constructionList);
 
         if(Game.time % 100 === 0) {
-            var repairList = _.sort(repairList, ['hits']);
+            var repairList = _.sortBy(repairList, ['hits']);
             var repairList = _.map(repairList, function(object) {
                 return object.id;
             });
