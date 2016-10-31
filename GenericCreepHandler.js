@@ -246,6 +246,9 @@ assign rest to upgrade
 
  */
 
+var MAX_REPAIR_HITS = 300000;
+var highestPriorityConstruction = undefined;
+
 function findTask(creep) {
     if(creep.carry.energy == 0) {
         return TASK_HARVEST;
@@ -270,15 +273,12 @@ function findTask(creep) {
         return TASK_REPAIR;
     }
 
-    if(highestPriorityConstruction.id) {
+    if(highestPriorityConstruction) {
         return TASK_BUILD;
     }
 
     return TASK_UPGRADING;
 }
-
-var MAX_REPAIR_HITS = 300000;
-var highestPriorityConstruction = {};
 
 module.exports = {
     role: 'GenericWorkerCreep',
@@ -305,6 +305,9 @@ module.exports = {
 
         var controller = Game.spawns['Spawn1'].room.controller;
         var highestPriorityConstruction = tasks[TASK_BUILD].findHighestPriority(constructionList);
+        if(highestPriorityConstruction) {
+            console.log("Highest priority: " + highestPriorityConstruction.structureType);
+        }
 
         if(Game.time % 100 === 0) {
             var repairList = _.sortBy(repairList, ['hits']);
