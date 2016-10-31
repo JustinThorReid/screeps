@@ -264,7 +264,7 @@ module.exports = {
     run: function(creeps) {
         // Create more creeps
         if(creeps.length < NEEDED_CREEPS) {
-            Game.spawns['Spawn1'].createCreep([MOVE,MOVE,WORK,WORK,WORK,CARRY], undefined, {role: 'GenericWorkerCreep'});
+            var newName = Game.spawns['Spawn1'].createCreep([MOVE,MOVE,WORK,WORK,WORK,CARRY], undefined, {role: 'GenericWorkerCreep'});
             console.log('Spawning new generic: ' + newName);
         }
 
