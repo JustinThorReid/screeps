@@ -87,8 +87,8 @@ tasks[TASK_HARVEST] = {
         if(creep.carry.energy < creep.carryCapacity) {
             var source = Game.getObjectById(creep.memory.harvestId);
             if(!source) {
-                console.log("Creep with TASK_HARVEST did not have source: " + JSON.stringify(rooms));
-                creep.memory.harvestId = rooms[creep.room.name][0].id;
+                console.log("Creep with TASK_HARVEST did not have source: " + JSON.stringify(addRoomData(creep.room)));
+                creep.memory.harvestId = addRoomData(creep.room)[0].id;
             }
 
             if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
