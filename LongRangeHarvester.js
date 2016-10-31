@@ -1,4 +1,5 @@
 var moveTask = require("task.move");
+var helperFunctions = require("HelperFunctions");
 
 // Hardcoded resource nodes
 var resourceNodes = {
@@ -82,18 +83,6 @@ var MINER = "MINER";
 var HAULER = "HAULER";
 var actions = {};
 
-function findBestBody(spawner, bodyList) {
-	var body = [];
-	var cap = spawner.energyCapacity;
-	for (var i = 0; i < bodyList.length; i++) {
-		body = bodyList[i].body;
-		if (cap >= bodyList[i].energy)
-			break;
-	}
-
-	return body;
-}
-
 /// Hybrid actions
 actions[HYBRID] = (function(){
 	var MODE_DEPOSIT_ENERGY = 0;
@@ -149,7 +138,7 @@ actions[HYBRID] = (function(){
 				}
 			];
 
-			var body = findBestBody(spawner, hybridBodyTypes);
+			var body = helperFunctions.findBestBody(spawner.room, hybridBodyTypes);
 
 			var creepName = spawner.createCreep(body, undefined, {
 				role: 'LongRangeHarvester',
@@ -278,7 +267,7 @@ actions[MINER] = (function(){
 				energy:250
 			}];
 
-			var body = findBestBody(spawner, minerBodyTypes);
+			var body = helperFunctions.findBestBody(spawner.room, minerBodyTypes);
 
 			var creepName = spawner.createCreep(body, undefined, {
 				role: 'LongRangeHarvester',

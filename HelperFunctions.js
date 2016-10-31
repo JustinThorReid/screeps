@@ -15,5 +15,18 @@ module.exports = {
             var pos = path.path[n];
             pos.createConstructionSite(STRUCTURE_ROAD);
         }
+    },
+
+    // Expects bodys to be of {body:[], energy:100} format
+    findBestBody: function(room, bodyList) {
+        var body = [];
+        var cap = room.energyCapacityAvailable;
+        for (var i = 0; i < bodyList.length; i++) {
+            body = bodyList[i].body;
+            if (cap >= bodyList[i].energy)
+                break;
+        }
+
+        return body;
     }
 };
