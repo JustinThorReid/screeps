@@ -86,6 +86,11 @@ tasks[TASK_HARVEST] = {
     run: function (creep){
         if(creep.carry.energy < creep.carryCapacity) {
             var source = Game.getObjectById(creep.memory.harvestId);
+            if(!source) {
+                console.log("Creep with TASK_HARVEST did not have source");
+                creep.memory.harvestId = rooms[creep.room.name][0].id;
+            }
+
             if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
                 moveTask(creep, source.pos);
             }
