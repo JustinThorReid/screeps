@@ -276,6 +276,7 @@ actions[MINER] = (function(){
 				collectTarget: sourceMemDat,
 				depositTarget:{}
 			});
+			console.log("Spawning miner: " + creepName);
 		}
 	}
 })();

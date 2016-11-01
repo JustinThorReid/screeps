@@ -4,8 +4,8 @@
 var helperFunctions = require("HelperFunctions");
 var moveTask = require("task.move");
 
-var NEEDED_CREEPS = 5;
-var MIN_UPGRADING = 1; // must have 1 to keep from loosing the room
+var NEEDED_CREEPS = 8;
+var MAX_REPAIR_HITS = 100000;
 
 var TASK_HARVEST = "TASK_HARVEST";
 var TASK_UPGRADING = "TASK_UPGRADING";
@@ -183,8 +183,11 @@ tasks[TASK_BUILD] = {
                 creep.moveTo(target);
             }
         } else {
+            if(!target || !(target instanceof ConstructionSite)){
+                Memory.highestPriorityConstructionId = undefined;
+            }
+
             creep.memory.subrole = undefined;
-            Memory.highestPriorityConstructionId = undefined;
             return true; // Done with task
         }
     },
@@ -245,26 +248,22 @@ assign rest to upgrade
 
  */
 
-var MAX_REPAIR_HITS = 300000;
-
 function findTask(creep) {
     if(creep.carry.energy == 0) {
         return TASK_HARVEST;
     }
 
-    if(tasks[TASK_UPGRADING].count < MIN_UPGRADING) {
+    if(creep.room.controller.ticksToDowngrade < 1000 && tasks[TASK_UPGRADING].count < 1) {
         return TASK_UPGRADING;
     }
 
     if(creep.room.energyAvailable < creep.room.energyCapacityAvailable) {
-        //var neededEnergy = creep.room.energyCapacityAvailable - creep.room.energyAvailable;
-        //var bodyUsed = helperFunctions.findBestBody(creep.room, GENERIC_BODIES);
-        //var energyPerCreep = _.countBy(bodyUsed)[CARRY] * 50;
-        //var inRoute = energyPerCreep * tasks[TASK_DEPOSIT].count;
+        var neededEnergy = creep.room.energyCapacityAvailable - creep.room.energyAvailable;
+        var inRoute = creep.carryCapacity * tasks[TASK_DEPOSIT].count;
 
-        //if(creep.room.energyAvailable + inRoute < creep.room.energyCapacityAvailable){
+        if(creep.room.energyAvailable + inRoute < creep.room.energyCapacityAvailable){
             return TASK_DEPOSIT;
-        //}
+        }
     }
 
     if(Memory.needsRepair.length > tasks[TASK_REPAIR].count) {
@@ -313,14 +312,18 @@ module.exports = {
                 return object.id;
             });
             Memory.needsRepair = _.union(Memory.needsRepair, repairList);
-
-            var repairObj = Game.getObjectById(Memory.needsRepair[0]);
-            while(repairObj && (repairObj.hits === repairObj.hitsMax || repairObj.hits > MAX_REPAIR_HITS)) {
-                Memory.needsRepair.pop();
-                repairObj = Game.getObjectById(Memory.needsRepair[0]);
-            }
+        }
+        var repairObj = Game.getObjectById(Memory.needsRepair[0]);
+        while(Memory.needsRepair.length > 0 && (!repairObj || repairObj.hits === repairObj.hitsMax || repairObj.hits > MAX_REPAIR_HITS)) {
+            Memory.needsRepair.pop();
+            repairObj = Game.getObjectById(Memory.needsRepair[0]);
         }
 
+        tasks[TASK_HARVEST].count = 0;
+        tasks[TASK_DEPOSIT].count = 0;
+        tasks[TASK_UPGRADING].count = 0;
+        tasks[TASK_REPAIR].count = 0;
+        tasks[TASK_BUILD].count = 0;
 
         // Handle creeps
         var untaskedCreeps = [];
