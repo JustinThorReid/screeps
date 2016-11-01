@@ -228,7 +228,7 @@ actions[MINER] = (function(){
 					for(var i in structures) {
 						structures[i].destroy();
 					}
-					var constructionSites = source.room.lookForAt(LOOK_CONSTRUCTION_SITES, goodTerrain[0].x, goodTerrain[0].y);
+					var constructionSites = source.room.lookForAt(LOOK_CONSTRUCTION_SITES, goodTerrain[0].x, goodTerrain[0].y) || [];
 					for(var i in constructionSites) {
 						constructionSites[i].destroy();
 					}
@@ -256,9 +256,15 @@ actions[MINER] = (function(){
 
 		// sourceMemDat is source data from Memory (pos/id)
 		spawnNew: function(spawner, sourceMemDat) {
-			var minerBodyTypes = [{
-				body:[MOVE,MOVE,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
-				energy:600
+
+			// 5 WORK is max to drain a source in claimed room
+			// 2.5 WORK is max to drain source in unclaimed
+			var minerBodyTypesOwnedRoom = [{
+				body:[MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, CARRY],
+				energy:650
+			},{
+				body:[MOVE,MOVE,WORK,WORK,WORK,WORK,CARRY],
+				energy:550
 			},{
 				body:[MOVE,WORK,WORK,WORK,CARRY],
 				energy:400
@@ -268,7 +274,7 @@ actions[MINER] = (function(){
 				energy:250
 			}];
 
-			var body = helperFunctions.findBestBody(spawner.room, minerBodyTypes);
+			var body = helperFunctions.findBestBody(spawner.room, minerBodyTypesOwnedRoom);
 
 			var creepName = spawner.createCreep(body, undefined, {
 				role: 'LongRangeHarvester',
@@ -302,5 +308,7 @@ module.exports = {
 
 			actions[creep.memory.subrole].run(creep);
 	    }
-	}
+	},
+
+	_actions: actions
 };

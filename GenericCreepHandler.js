@@ -305,14 +305,13 @@ module.exports = {
             Memory.highestPriorityConstructionId = tasks[TASK_BUILD].findHighestPriority(constructionList).id;
         }
 
-        if(Game.time % 10 === 0) {
-            console.log("Recalc repairlist");
-            var repairList = _.sortBy(repairList, ['hits']);
-            var repairList = _.map(repairList, function(object) {
-                return object.id;
-            });
-            Memory.needsRepair = _.union(Memory.needsRepair, repairList);
-        }
+
+        var repairList = _.sortBy(repairList, ['hits']);
+        var repairList = _.map(repairList, function(object) {
+            return object.id;
+        });
+        Memory.needsRepair = _.union(Memory.needsRepair, repairList);
+
         var repairObj = Game.getObjectById(Memory.needsRepair[0]);
         while(Memory.needsRepair.length > 0 && (!repairObj || repairObj.hits === repairObj.hitsMax || repairObj.hits > MAX_REPAIR_HITS)) {
             Memory.needsRepair.pop();
