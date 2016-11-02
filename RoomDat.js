@@ -1,6 +1,7 @@
 /**
  * Created by phatn on 11/1/2016.
  */
+Memory.data = Memory.data || {};
 Memory.data.rooms = Memory.data.rooms || {};
 Memory.data.sources = Memory.data.sources || {};
 
