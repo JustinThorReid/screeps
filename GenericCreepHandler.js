@@ -288,16 +288,20 @@ module.exports = {
             }
         }
 
-        var repairList = _.map(repairList, function(object) {
-            return {
-                id:object.id,
-                hits:object.hits
-            };
+        var keys = {};
+        for(var n in Memory.needsRepair) {
+            keys[Memory.needsRepair[n].id] = true;
+        }
+
+        _.each(repairList, function(object) {
+            if(!keys[object.id]) {
+                Memory.needsRepair.push({
+                    id:object.id,
+                    hits:object.hits
+                });
+            }
         });
-        Memory.needsRepair = _.unionBy([Memory.needsRepair, repairList], function (obj) {
-            return obj.hits;
-        });
-        _.sortBy(Memory.needsRepair, ['hits'])
+        _.sortByOrder(Memory.needsRepair, ['hits'], "desc");
 
         var repairObj = Game.getObjectById(Memory.needsRepair[0].id);
         while(Memory.needsRepair.length > 0 && (!repairObj || repairObj.hits === repairObj.hitsMax || repairObj.hits > MAX_REPAIR_HITS)) {
