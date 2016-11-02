@@ -303,7 +303,7 @@ module.exports = {
 				if (creep.memory.subrole === MINER) {
 					miningSourceIds.push(creep.memory.collectTarget.id);
 				} else if(creep.memory.subrole === HAULER) {
-					haulingSourceIds.push(creep.memory.collectTarget.sourceId);
+					haulingSourceIds.push(creep.memory.collectTarget.id);
 				}
 			});
 
