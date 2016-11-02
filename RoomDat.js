@@ -1,9 +1,9 @@
 /**
  * Created by phatn on 11/1/2016.
  */
-Memory.data = Memory.data || {};
-Memory.data.rooms = Memory.data.rooms || {};
-Memory.data.sources = Memory.data.sources || {};
+var Memorydata = {};
+Memorydata.rooms = Memorydata.rooms || {};
+Memorydata.sources = Memorydata.sources || {};
 
 function addSourceData(sourceObj) {
     var sourceData = {};
@@ -20,7 +20,7 @@ function addSourceData(sourceObj) {
         return {id: object[LOOK_STRUCTURES].id};
     });
 
-    Memory.data.sources[sourceObj.id] = sourceData;
+    Memorydata.sources[sourceObj.id] = sourceData;
     return sourceData;
 }
 
@@ -35,14 +35,14 @@ function addRoomData(room) {
         roomData.sourceIds.push(source.id);
     });
 
-    Memory.data.rooms[room.name] = roomData;
+    Memorydata.rooms[room.name] = roomData;
     return roomData;
 }
 
 // Always returns a value
 var getRoomDataFromObj = function (roomObj) {
-    if(Memory.data.rooms[roomObj.name]) {
-        return Memory.data.rooms[roomObj.name];
+    if(Memorydata.rooms[roomObj.name]) {
+        return Memorydata.rooms[roomObj.name];
     }
 
     return addRoomData(roomObj);
@@ -52,9 +52,12 @@ var getEnergySources = function (roomObj) {
     var roomDat = getRoomDataFromObj(roomObj);
 
     return _.map(roomDat.sourceIds, function(sourceId) {
-        return Memory.data.sources[sourceId];
+        return Memorydata.sources[sourceId];
     });
 };
+
+
+
 
 module.exports = {
     "getRoomDataFromObj" : getRoomDataFromObj,

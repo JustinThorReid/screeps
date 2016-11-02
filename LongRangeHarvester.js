@@ -1,83 +1,6 @@
 var moveTask = require("task.move");
 var helperFunctions = require("HelperFunctions");
 
-// Hardcoded resource nodes
-var resourceNodes = {
-'W37S39_16_16':{
-	pos:new RoomPosition(16, 16, 'W37S39'),
-	creepsNeeded:3,
-	creepsAssigned:['Joe']
-},
-
-'W37S39_29_3':{
-	pos:new RoomPosition(29, 3, 'W37S39'),
-	creepsNeeded:2,
-	creepsAssigned:['Bob']
-}};
-
-var roomNavGraph = {
-	'W37S39': { // Home -1y
-		'W37S38':new RoomPosition(30,  0, 'W37S39'),
-		'W36S39':new RoomPosition(49, 36, 'W37S39')
-	},
-	'W37S38':{ // Home
-		'W37S39':new RoomPosition(30, 49, 'W37S38')
-	},
-	'W36S39':{ // Home -1x -1y
-		'W37S39':new RoomPosition(0, 36, 'W36S39')
-	}
-};
-
-/*
-// Does not handle loops in the room graph
-// Does not have room costs
-// Stops at first path found
-var _roomPathingTrace = function(destNode) {	
-	var child = destNode;
-	
-	while(child.parentNode.parentNode) {
-		child = child.parentNode;
-	}
-	
-	return child.name;
-}
-
-var roomPathing = function(sourceName, destName) {	
-	var allRooms = Object.keys(roomNavGraph);
-	var roomsToCheck = [];
-	
-	roomsToCheck.push({
-		'parentNode':undefined,
-		'name':sourceName
-	});	
-	_.pull(allRooms, sourceName);
-	
-	for(var i = 0; i < roomsToCheck.length; i++) {
-		var possibleExits = Object.keys(roomNavGraph[roomsToCheck[i].name]);
-		
-		for(var possibleExitId in possibleExits) {
-			var possibleExit = possibleExits[possibleExitId];
-			if(_.includes(allRooms, possibleExit)) {
-				var newNode = {
-					'name':possibleExit,
-					'parentNode':roomsToCheck[i]
-				};
-				
-				roomsToCheck.push(newNode);
-				_.pull(allRooms, possibleExit);
-				
-				if(possibleExit === destName) {
-					console.log(roomsToCheck.length);
-					return _roomPathingTrace(newNode);
-				}
-			}
-		}
-	}
-	
-	console.log("LongRangeHarvester: Error on room pathing, no path found " + sourceName + " -> " + destName);
-}
-*/
-
 var HYBRID = "HYBRID";
 var MINER = "MINER";
 var HAULER = "HAULER";
@@ -295,6 +218,21 @@ actions[MINER] = (function(){
 		}
 	}
 })();
+// Hardcoded resource nodes
+/*
+ var scoutData = {
+ 'W37S39_16_16':{
+ pos:new RoomPosition(16, 16, 'W37S39'),
+ creepsNeeded:3,
+ creepsAssigned:['Joe']
+ },
+
+ 'W37S39_29_3':{
+ pos:new RoomPosition(29, 3, 'W37S39'),
+ creepsNeeded:2,
+ creepsAssigned:['Bob']
+ }};
+ */
 
 
 module.exports = {
@@ -302,14 +240,47 @@ module.exports = {
 		var spawner = Game.spawns['Spawn1'];
 		var longRangeCreeps = _.filter(Game.creeps, (creep) => creep.memory.role == 'LongRangeHarvester');
 
-		if(longRangeCreeps.length < 3) {
-			actions[HYBRID].spawnNew(spawner, {
-				pos: new RoomPosition(32, 28, 'E2S18'),
-				id: '55c34a6b5be41a0a6e80bcef'
-			},{
-				pos: new RoomPosition(25, 32, 'E3S18'),
-				id: '55c34a6b5be41a0a6e80c1d8'
+		if(!spawner.spawning) {
+			var miningSourceIds = [];
+			var haulingSourceIds = [];
+			_.each(longRangeCreeps, function (creep) {
+				if (creep.memory.subrole === MINER) {
+					miningSourceIds.push(creep.memory.collectTarget.id);
+				} else if(creep.memory.subrole === HAULER) {
+					haulingSourceIds.push(creep.memory.collectTarget.sourceId);
+				}
 			});
+
+			var scoutSources = {};
+			var scoutSourceIds = [];
+			for(var n in Memory.scoutData.rooms) {
+				if(Memory.scoutData.rooms[n].shouldUse) {
+					_.each(Memory.scoutData.rooms[n].sourceDat, function (sourceDat) {
+						scoutSources[sourceDat.id] = sourceDat;
+						scoutSourceIds.push(sourceDat.id);
+					});
+				}
+			}
+			var sourcesNeeded = _.difference(scoutSourceIds, miningSourceIds)
+			_.each(sourcesNeeded, function (sourceId) {
+				actions[MINER].spawnNew(spawner, scoutSources[sourceId]);
+			});
+			var haulingNeeded = _.difference(scoutSourceIds, haulingSourceIds)
+			_.each(haulingNeeded, function (sourceId) {
+				actions[HAULER].spawnNew(spawner, scoutSources[sourceId]);
+			});
+
+			/*
+			if (longRangeCreeps.length < 3) {
+				actions[HYBRID].spawnNew(spawner, {
+					pos: new RoomPosition(32, 28, 'E2S18'),
+					id: '55c34a6b5be41a0a6e80bcef'
+				}, {
+					pos: new RoomPosition(25, 32, 'E3S18'),
+					id: '55c34a6b5be41a0a6e80c1d8'
+				});
+			}
+			*/
 		}
 
 		for(var name in longRangeCreeps) {

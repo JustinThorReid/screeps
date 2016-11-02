@@ -5,7 +5,7 @@ var helperFunctions = require("HelperFunctions");
 var moveTask = require("task.move");
 var roomData = require("RoomDat");
 
-var NEEDED_CREEPS = 8;
+var NEEDED_CREEPS = 4;
 var MAX_REPAIR_HITS = 100000;
 
 var TASK_HARVEST = "TASK_HARVEST";
@@ -15,7 +15,7 @@ var TASK_BUILD = "TASK_BUILD";
 var TASK_DEPOSIT = "TASK_DEPOSIT";
 
 var TYPE_STORAGE = "TYPE_STORAGE";
-var TYPE_SOURCE = "TYPE_SOURCE;"
+var TYPE_SOURCE = "TYPE_SOURCE";
 
 var GENERIC_BODIES = [{
     body:[MOVE,MOVE,MOVE,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY],
