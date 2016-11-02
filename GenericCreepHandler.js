@@ -302,7 +302,13 @@ module.exports = {
         if(Game.time % 11 === 0) {
             console.log("Recalc construction list");
             var constructionList = Game.spawns['Spawn1'].room.find(FIND_MY_CONSTRUCTION_SITES);
-            Memory.highestPriorityConstructionId = tasks[TASK_BUILD].findHighestPriority(constructionList).id;
+            var highestPriorityObject = tasks[TASK_BUILD].findHighestPriority(constructionList);
+
+            if(highestPriorityObject){
+                Memory.highestPriorityConstructionId = highestPriorityObject.id;
+            } else {
+                Memory.highestPriorityConstructionId = undefined;
+            }
         }
 
 
