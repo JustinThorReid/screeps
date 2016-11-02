@@ -242,7 +242,7 @@ actions[HAULER] = (function(){
 	var collectEnergy = function (creep) {
 		var target = Game.getObjectById(creep.memory.collectTarget.id);
 
-		if(creep.carry.energy == creep.carryCapacity || (target && target.store[RESOURCE_ENERGY] === 0)) {
+		if(creep.carry && creep.carry.energy == creep.carryCapacity || (target && target.store[RESOURCE_ENERGY] === 0)) {
 			creep.memory.currentTask = MODE_DEPOSIT_ENERGY;
 			return;
 		}
