@@ -42,7 +42,7 @@ function addRoomData(room) {
 // Always returns a value
 var getRoomDataFromObj = function (roomObj) {
     if(Memory.data.rooms[roomObj.name]) {
-        return Memory.roomData[roomObj.name];
+        return Memory.data.rooms[roomObj.name];
     }
 
     return addRoomData(roomObj);
