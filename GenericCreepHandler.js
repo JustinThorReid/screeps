@@ -107,7 +107,7 @@ tasks[TASK_REPAIR] = {
         creep.memory.subrole = TASK_REPAIR;
     },
     run: function (creep) {
-        var repairObj = Game.getObjectById(Memory.needsRepair[0]);
+        var repairObj = Game.getObjectById(Memory.needsRepair[0].id);
 
         if(!repairObj || creep.carry.energy == 0) {
             creep.memory.subrole = undefined;
@@ -278,7 +278,6 @@ module.exports = {
         var controller = Game.spawns['Spawn1'].room.controller;
 
         if(Game.time % 11 === 0) {
-            console.log("Recalc construction list");
             var constructionList = Game.spawns['Spawn1'].room.find(FIND_MY_CONSTRUCTION_SITES);
             var highestPriorityObject = tasks[TASK_BUILD].findHighestPriority(constructionList);
 
@@ -289,17 +288,19 @@ module.exports = {
             }
         }
 
-
-        var repairList = _.sortBy(repairList, ['hits']);
         var repairList = _.map(repairList, function(object) {
-            return object.id;
+            return {
+                id:object.id,
+                hits:object.hits
+            };
         });
         Memory.needsRepair = _.union(Memory.needsRepair, repairList);
+        _.sortBy(Memory.needsRepair, ['hits'])
 
-        var repairObj = Game.getObjectById(Memory.needsRepair[0]);
+        var repairObj = Game.getObjectById(Memory.needsRepair[0].id);
         while(Memory.needsRepair.length > 0 && (!repairObj || repairObj.hits === repairObj.hitsMax || repairObj.hits > MAX_REPAIR_HITS)) {
             Memory.needsRepair.pop();
-            repairObj = Game.getObjectById(Memory.needsRepair[0]);
+            repairObj = Game.getObjectById(Memory.needsRepair[0].id);
         }
 
         tasks[TASK_HARVEST].count = 0;
