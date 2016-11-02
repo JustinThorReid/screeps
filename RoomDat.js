@@ -1,6 +1,8 @@
 /**
  * Created by phatn on 11/1/2016.
  */
+var helperFunctions = require("HelperFunctions");
+
 var Memorydata = {};
 Memorydata.rooms = Memorydata.rooms || {};
 Memorydata.sources = Memorydata.sources || {};
@@ -14,9 +16,7 @@ function addSourceData(sourceObj) {
         return {x: object.x, y: object.y};
     });
 
-    sourceData.storage = _.map(_.filter(sourceObj.room.lookForAtArea(LOOK_STRUCTURES, sourceObj.pos.y-1, sourceObj.pos.x-1, sourceObj.pos.y+1, sourceObj.pos.x+1, true), function(obj){
-        return obj[LOOK_STRUCTURES].structureType === STRUCTURE_CONTAINER;
-    }), function(object) {
+    sourceData.storage = _.map(helperFunctions.findContainersAroundPos(sourceObj.room, sourceObj.pos), function(object) {
         return {id: object[LOOK_STRUCTURES].id};
     });
 

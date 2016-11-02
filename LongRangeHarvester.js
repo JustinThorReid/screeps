@@ -84,7 +84,7 @@ actions[MINER] = (function(){
 		} else {
 			var target = Game.getObjectById(creep.memory.depositTarget.id);
 
-			if(target) {
+			if(target && !(target instanceof constructionSite)) {
 				if(target.hits < target.hitsMax) {
 					creep.repair(target);
 				} else {
@@ -309,9 +309,15 @@ module.exports = {
 
 			var scoutSources = {};
 			var scoutSourceIds = [];
+			var realContainerIds = [];
 			for(var n in Memory.scoutData.rooms) {
 				if(Memory.scoutData.rooms[n].shouldUse) {
 					_.each(Memory.scoutData.rooms[n].sourceDat, function (sourceDat) {
+						var containers = helperFunctions.findContainersAroundPos(Game.rooms[n], sourceDat.pos);
+						if(containers.length) {
+							realContainerIds.push(object[LOOK_STRUCTURES].id);
+						}
+
 						scoutSources[sourceDat.id] = sourceDat;
 						scoutSourceIds.push(sourceDat.id);
 					});
@@ -321,7 +327,6 @@ module.exports = {
 			_.each(sourcesNeeded, function (sourceId) {
 				actions[MINER].spawnNew(spawner, scoutSources[sourceId]);
 			});
-			var haulingNeeded = _.difference(scoutSourceIds, haulingSourceIds);
 
 			// Put into storage first, if not then room controller
 			var destOpts;
@@ -338,6 +343,7 @@ module.exports = {
 					needsWork: true
 				};
 			}
+			var haulingNeeded = _.difference(scoutSourceIds, realContainerIds);
 			_.each(haulingNeeded, function (sourceId) {
 				actions[HAULER].spawnNew(spawner, scoutSources[sourceId], destOpts);
 			});

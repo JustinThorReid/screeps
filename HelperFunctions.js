@@ -28,5 +28,12 @@ module.exports = {
         }
 
         return body;
+    },
+
+    // pos must just have x and y
+    findContainersAroundPos: function(room, pos){
+        return _.filter(room.lookForAtArea(LOOK_STRUCTURES, pos.y-1, pos.x-1, pos.y+1, pos.x+1, true), function(obj){
+            return obj[LOOK_STRUCTURES].structureType === STRUCTURE_CONTAINER;
+        });
     }
 };
