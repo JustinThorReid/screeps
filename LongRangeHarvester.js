@@ -178,7 +178,7 @@ actions[MINER] = (function(){
 			var target = Game.getObjectById(creep.memory.depositTarget.id);
 
 			if(target) {
-				if(target.hits < target.hitsMax/3) {
+				if(target.hits < target.hitsMax) {
 					creep.repair(target);
 				} else {
 					creep.transfer(target, RESOURCE_ENERGY);
