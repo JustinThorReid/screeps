@@ -184,13 +184,22 @@ actions[MINER] = (function(){
 					creep.transfer(target, RESOURCE_ENERGY);
 				}
 			} else {
-				target = Game.constructionSites[creep.memory.depositTarget.id];
-
-				if(target) {
-					creep.build(target);
+				var constructionSite = _.filter(creep.pos.lookFor(LOOK_CONSTRUCTION_SITES), function (obj) {
+					return obj.structureType === STRUCTURE_CONTAINER;
+				});
+				if(constructionSite.length){
+					creep.build(constructionSite[0]);
 				} else {
-					creep.pos.createConstructionSite(STRUCTURE_CONTAINER);
-					creep.memory.depositTarget.id = creep.pos.lookFor(LOOK_CONSTRUCTION_SITES);
+					var container = _.filter(creep.pos.lookFor(LOOK_STRUCTURES), function (obj) {
+						return obj.structureType === STRUCTURE_CONTAINER;
+					});
+
+					if(container.length) {
+						creep.memory.depositTarget.id = container[0].id;
+					} else {
+						creep.pos.createConstructionSite(STRUCTURE_CONTAINER);
+						creep.memory.depositTarget.id = creep.pos.lookFor(LOOK_CONSTRUCTION_SITES);
+					}
 				}
 			}
 		}
