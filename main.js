@@ -25,7 +25,8 @@ module.exports.loop = function () {
         _.each(sources, function (sourceObj) {
             scoutRoom.sourceDat.push({
                 id: sourceObj.id,
-                pos: sourceObj.pos
+                pos: sourceObj.pos,
+                energyCapacity: sourceObj.energyCapacity
             });
         });
 
