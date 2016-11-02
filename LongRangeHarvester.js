@@ -175,7 +175,7 @@ actions[MINER] = (function(){
 			var source = Game.getObjectById(creep.memory.collectTarget.id);
 			creep.harvest(source);
 		} else {
-			var target = Game.structures[creep.memory.depositTarget.id];
+			var target = Game.getObjectById(creep.memory.depositTarget.id);
 
 			if(target) {
 				if(target.hits < target.hitsMax/3) {
