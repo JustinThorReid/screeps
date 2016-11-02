@@ -8,13 +8,13 @@ Memory.data.sources = Memory.data.sources || {};
 function addSourceData(sourceObj) {
     var sourceData = {};
     sourceData.id = sourceObj.id;
-    sourceData.slots = _.map(_.filter(sourceObj.room.lookForAtArea(LOOK_TERRAIN, source.pos.y - 1, source.pos.x - 1, source.pos.y + 1, source.pos.x + 1, true), function (object) {
+    sourceData.slots = _.map(_.filter(sourceObj.room.lookForAtArea(LOOK_TERRAIN, sourceObj.pos.y - 1, sourceObj.pos.x - 1, sourceObj.pos.y + 1, sourceObj.pos.x + 1, true), function (object) {
         return object[LOOK_TERRAIN] !== "wall";
     }), function (object) {
         return {x: object.x, y: object.y};
     });
 
-    sourceData.storage = _.map(_.filter(sourceObj.room.lookForAtArea(LOOK_STRUCTURES, source.pos.y-1, source.pos.x-1, source.pos.y+1, source.pos.x+1, true), function(obj){
+    sourceData.storage = _.map(_.filter(sourceObj.room.lookForAtArea(LOOK_STRUCTURES, sourceObj.pos.y-1, sourceObj.pos.x-1, sourceObj.pos.y+1, sourceObj.pos.x+1, true), function(obj){
         return obj.structureType === STRUCTURE_CONTAINER;
     }), function(object) {
         return {id: object.id};
