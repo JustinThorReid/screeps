@@ -15,9 +15,9 @@ function addSourceData(sourceObj) {
     });
 
     sourceData.storage = _.map(_.filter(sourceObj.room.lookForAtArea(LOOK_STRUCTURES, sourceObj.pos.y-1, sourceObj.pos.x-1, sourceObj.pos.y+1, sourceObj.pos.x+1, true), function(obj){
-        return obj.structureType === STRUCTURE_CONTAINER;
+        return obj[LOOK_STRUCTURES].structureType === STRUCTURE_CONTAINER;
     }), function(object) {
-        return {id: object.id};
+        return {id: object[LOOK_STRUCTURES].id};
     });
 
     Memory.data.sources[sourceObj.id] = sourceData;
