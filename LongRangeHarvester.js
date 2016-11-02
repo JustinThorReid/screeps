@@ -84,7 +84,7 @@ actions[MINER] = (function(){
 		} else {
 			var target = Game.getObjectById(creep.memory.depositTarget.id);
 
-			if(target && !(target instanceof constructionSite)) {
+			if(target && !(target instanceof ConstructionSite)) {
 				if(target.hits < target.hitsMax) {
 					creep.repair(target);
 				} else {
@@ -185,12 +185,18 @@ actions[MINER] = (function(){
 				body:[MOVE,WORK,WORK,WORK,CARRY],
 				energy:400
 			},{
-				// Will have to dump on ground
-				body:[MOVE,WORK,WORK],
-				energy:250
+				body:[MOVE,WORK,WORK,CARRY],
+				energy:300
 			}];
+            var minerBodyTypesNonOwnedRoom = [{
+                body:[MOVE,WORK,WORK,WORK,CARRY],
+                energy:400
+            },{
+                body:[MOVE,WORK,WORK,CARRY],
+                energy:300
+            }];
 
-			var body = helperFunctions.findBestBody(spawner.room, minerBodyTypesOwnedRoom);
+			var body = helperFunctions.findBestBody(spawner.room, sourceMemDat.energyCapacity === 1500 ? minerBodyTypesNonOwnedRoom : minerBodyTypesOwnedRoom);
 
 			var creepName = spawner.createCreep(body, undefined, {
 				role: 'LongRangeHarvester',
@@ -313,10 +319,12 @@ module.exports = {
 			for(var n in Memory.scoutData.rooms) {
 				if(Memory.scoutData.rooms[n].shouldUse) {
 					_.each(Memory.scoutData.rooms[n].sourceDat, function (sourceDat) {
-						var containers = helperFunctions.findContainersAroundPos(Game.rooms[n], sourceDat.pos);
-						if(containers.length) {
-							realContainerIds.push(object[LOOK_STRUCTURES].id);
-						}
+                        if(Game.rooms[n]) {
+                            var containers = helperFunctions.findContainersAroundPos(Game.rooms[n], sourceDat.pos);
+                            if (containers.length) {
+                                realContainerIds.push(containers[0][LOOK_STRUCTURES].id);
+                            }
+                        }
 
 						scoutSources[sourceDat.id] = sourceDat;
 						scoutSourceIds.push(sourceDat.id);
@@ -343,9 +351,9 @@ module.exports = {
 					needsWork: true
 				};
 			}
-			var haulingNeeded = _.difference(scoutSourceIds, realContainerIds);
+			var haulingNeeded = _.difference(realContainerIds, haulingSourceIds);
 			_.each(haulingNeeded, function (sourceId) {
-				actions[HAULER].spawnNew(spawner, scoutSources[sourceId], destOpts);
+				actions[HAULER].spawnNew(spawner, Game.getObjectById(sourceId), destOpts);
 			});
 
 			/*
