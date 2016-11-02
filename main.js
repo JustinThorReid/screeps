@@ -2,9 +2,6 @@ var genericCreepHandler = require("GenericCreepHandler");
 var longRangeHarvester = require('LongRangeHarvester');
 var roleAttacker = require('attacker');
 
-Memory.scoutData = Memory.scoutData || {};
-Memory.scoutData.rooms = Memory.scoutData.rooms || {};
-
 module.exports.loop = function () {
 	// Old memory cleanup
     for(var name in Memory.creeps) {
@@ -13,6 +10,9 @@ module.exports.loop = function () {
 			console.log('Clearing non-existing creep memory:', name);
         }
     }
+
+    Memory.scoutData = Memory.scoutData || {};
+    Memory.scoutData.rooms = Memory.scoutData.rooms || {};
 
     var scoutRooms = Object.keys(Memory.scoutData.rooms);
     var realRooms = Object.keys(Game.rooms);

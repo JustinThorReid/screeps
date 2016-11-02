@@ -31,61 +31,75 @@ var GENERIC_BODIES = [{
 
 var tasks = {
 };
-tasks[TASK_HARVEST] = {
-    init: function(creep) {
-        creep.memory.subrole = TASK_HARVEST;
+tasks[TASK_HARVEST] = (function() {
+    return {
+        init: function(creep) {
+            creep.memory.subrole = TASK_HARVEST;
+            creep.memory.harvestId = undefined;
+            creep.memory.harvestType = undefined;
 
-        // In a storage based room, no sources or containers need to be considered
-        if(creep.room.storage) {
-            creep.memory.harvestId = creep.room.storage.id;
-            creep.memory.harvestType = TYPE_STORAGE;
-        } else {
-            var roomSources = _.shuffle(roomData.getEnergySources(creep.room));
-            var sourceToUse = roomSources[0];
-
-            if(sourceToUse.storage.length) {
-                creep.memory.harvestId = sourceToUse.storage[0].id;
+            // In a storage based room, no sources or containers need to be considered
+            if(creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY] > 0) {
+                creep.memory.harvestId = creep.room.storage.id;
                 creep.memory.harvestType = TYPE_STORAGE;
             } else {
-                creep.memory.harvestId = sourceToUse.id;
-                creep.memory.harvestType = TYPE_SOURCE;
-            }
-        }
-    },
+                var roomSources = _.shuffle(roomData.getEnergySources(creep.room));
+                var sourceToUse = roomSources[0];
 
-    run: function (creep){
-        if(creep.carry.energy < creep.carryCapacity) {
-            var source = Game.getObjectById(creep.memory.harvestId);
-            if(!source) {
-                console.log("Creep with TASK_HARVEST did not have source: " + JSON.stringify(addRoomData(creep.room)));
-                tasks[TASK_HARVEST].init(creep);
-                return;
-            }
+                if(sourceToUse.storage.length) {
+                    _.each(sourceToUse.storage, function (storageDat) {
+                        var storageObj = Game.getObjectById(storageDat.id);
 
-            if(creep.memory.harvestType === TYPE_STORAGE) {
+                        if(storageObj.store[RESOURCE_ENERGY] > 0) {
+                            creep.memory.harvestId = storageDat.id;
+                            creep.memory.harvestType = TYPE_STORAGE;
+                            return false; //break;
+                        }
+                    });
+                    creep.memory.harvestId = sourceToUse.storage[0].id;
+                    creep.memory.harvestType = TYPE_STORAGE;
+                }
+
+                // Default to the source itself
+                if(!creep.memory.harvestId) {
+                    creep.memory.harvestId = sourceToUse.id;
+                    creep.memory.harvestType = TYPE_SOURCE;
+                }
+            }
+        },
+
+        run: function (creep){
+            if(creep.carry.energy < creep.carryCapacity) {
                 var harvestObj = Game.getObjectById(creep.memory.harvestId);
                 if(!harvestObj) {
-                    console.log("Harvest storage missing!");
+                    console.log("Creep with TASK_HARVEST did not have source: " + creep.room.name);
                     tasks[TASK_HARVEST].init(creep);
                     return;
                 }
 
-                if(creep.withdraw(harvestObj, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
-                    moveTask(creep, harvestObj.pos);
-                }
-            } else {
-                if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                    moveTask(creep, source.pos);
+                if(creep.memory.harvestType === TYPE_STORAGE) {
+                    if(!harvestObj || harvestObj.store[RESOURCE_ENERGY] <= 0) {
+                        tasks[TASK_HARVEST].init(creep);
+                        return;
+                    }
+
+                    if(creep.withdraw(harvestObj, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
+                        moveTask(creep, harvestObj.pos);
+                    }
+                } else {
+                    if (creep.harvest(harvestObj) == ERR_NOT_IN_RANGE) {
+                        moveTask(creep, harvestObj.pos);
+                    }
                 }
             }
-        }
-        else {
-            creep.memory.subrole = undefined;
-            return true; // Done with task
-        }
-    },
-    count: 0
-};
+            else {
+                creep.memory.subrole = undefined;
+                return true; // Done with task
+            }
+        },
+        count: 0
+    }
+})();
 
 tasks[TASK_UPGRADING] = {
     init: function (creep) {
@@ -107,7 +121,7 @@ tasks[TASK_REPAIR] = {
         creep.memory.subrole = TASK_REPAIR;
     },
     run: function (creep) {
-        var repairObj = Game.getObjectById(Memory.needsRepair[0].id);
+        var repairObj = Memory.needsRepair[0] && Game.getObjectById(Memory.needsRepair[0].id);
 
         if(!repairObj || creep.carry.energy == 0) {
             creep.memory.subrole = undefined;
@@ -231,7 +245,7 @@ function findTask(creep) {
         return TASK_HARVEST;
     }
 
-    if(creep.room.controller.ticksToDowngrade < 1000 && tasks[TASK_UPGRADING].count < 1) {
+    if(creep.room.controller.ticksToDowngrade < 10000 && tasks[TASK_UPGRADING].count < 1) {
         return TASK_UPGRADING;
     }
 
@@ -270,7 +284,7 @@ module.exports = {
         _.each(Game.spawns['Spawn1'].room.find(FIND_STRUCTURES), function (object) {
            if((object.structureType == STRUCTURE_EXTENSION || object.structureType == STRUCTURE_SPAWN) && object.energy < object.energyCapacity) {
                spawnStorageList.push(object);
-           } else if(object.hits < object.hitsMax / 2.5 && object.hits < MAX_REPAIR_HITS) {
+           } else if(object.hits < Math.min(MAX_REPAIR_HITS, object.hitsMax) / 2.5) {
                repairList.push(object);
            }
         });
@@ -301,12 +315,14 @@ module.exports = {
                 });
             }
         });
-        _.sortByOrder(Memory.needsRepair, ['hits'], "desc");
+        Memory.needsRepair = _.sortBy(Memory.needsRepair, 'hits');
 
-        var repairObj = Game.getObjectById(Memory.needsRepair[0].id);
-        while(Memory.needsRepair.length > 0 && (!repairObj || repairObj.hits === repairObj.hitsMax || repairObj.hits > MAX_REPAIR_HITS)) {
-            Memory.needsRepair.pop();
-            repairObj = Game.getObjectById(Memory.needsRepair[0].id);
+        if(Memory.needsRepair[0]) {
+            var repairObj = Game.getObjectById(Memory.needsRepair[0].id);
+            while (Memory.needsRepair.length > 0 && (!repairObj || repairObj.hits >= Math.min(MAX_REPAIR_HITS, repairObj.hitsMax))) {
+                Memory.needsRepair.pop();
+                repairObj = Game.getObjectById(Memory.needsRepair[0].id);
+            }
         }
 
         tasks[TASK_HARVEST].count = 0;
