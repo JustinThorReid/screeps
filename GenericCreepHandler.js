@@ -3,6 +3,7 @@
  */
 var helperFunctions = require("HelperFunctions");
 var moveTask = require("task.move");
+var roomData = require("RoomDat");
 
 var NEEDED_CREEPS = 8;
 var MAX_REPAIR_HITS = 100000;
@@ -13,6 +14,8 @@ var TASK_REPAIR = "TASK_REPAIR";
 var TASK_BUILD = "TASK_BUILD";
 var TASK_DEPOSIT = "TASK_DEPOSIT";
 
+var TYPE_STORAGE = "TYPE_STORAGE";
+var TYPE_SOURCE = "TYPE_SOURCE;"
 
 var GENERIC_BODIES = [{
     body:[MOVE,MOVE,MOVE,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY],
@@ -24,35 +27,7 @@ var GENERIC_BODIES = [{
     body:[MOVE,MOVE,WORK,CARRY,CARRY],
     energy:300
 }];
-/*
-rooms = {
-    "E1S1": [{
-        'id':'asda',
-        'slots':[
-            {x:1, y:1}
-        ]
-    }]
- */
-var rooms = {};
-function addRoomData(room) {
-    var roomData = [];
-    var sources = _.shuffle(room.find(FIND_SOURCES));
 
-    _.each(sources, function(source) {
-        var sourceData = {};
-        sourceData.id = source.id;
-        sourceData.slots = _.map(_.filter(room.lookForAtArea(LOOK_TERRAIN, source.pos.y-1, source.pos.x-1, source.pos.y+1, source.pos.x+1, true), function(object){
-            return object[LOOK_TERRAIN] !== "wall";
-        }), function(object) {
-           return {x: object.x, y: object.y};
-        });
-
-        roomData.push(sourceData);
-    });
-
-    rooms[room.name] = roomData;
-    return roomData;
-}
 
 var tasks = {
 };
@@ -60,33 +35,16 @@ tasks[TASK_HARVEST] = {
     init: function(creep) {
         creep.memory.subrole = TASK_HARVEST;
 
-        var roomSources = rooms[creep.room.name];
-        if (!roomSources) {
-            roomSources = addRoomData(creep.room);
+        var roomSources = _.shuffle(roomData.getEnergySources(creep.room));
+        var sourceToUse = roomSources[0];
+
+        if(sourceToUse.storage.length) {
+            creep.memory.harvestId = sourceToUse.storage[0].id;
+            creep.memory.harvestType = TYPE_STORAGE;
+        } else {
+            creep.memory.harvestId = sourceToUse.id;
+            creep.memory.harvestType = TYPE_SOURCE;
         }
-
-         // Find first slot that has no creep
-         var sourceToUse = false;
-         _.each(roomSources, function(source) {
-             _.each(source.slots, function(slot) {
-                 if(!creep.room.lookForAt(LOOK_CREEPS, slot.x, slot.y).length) {
-                     sourceToUse = source;
-                     return false; // break;
-                 }
-             });
-
-             if(sourceToUse) {
-                return false; // break;
-             }
-         });
-
-        if(!sourceToUse){
-            sourceToUse = roomSources[Math.floor(Math.random() * roomSources.length)];
-        }
-        //var slot = source.slots[Math.floor(Math.random() * source.slots.length)];
-
-        creep.memory.harvestId = sourceToUse.id;
-        //creep.memory.harvestSlot = slot;
     },
 
     run: function (creep){
@@ -94,11 +52,25 @@ tasks[TASK_HARVEST] = {
             var source = Game.getObjectById(creep.memory.harvestId);
             if(!source) {
                 console.log("Creep with TASK_HARVEST did not have source: " + JSON.stringify(addRoomData(creep.room)));
-                creep.memory.harvestId = addRoomData(creep.room)[0].id;
+                tasks[TASK_HARVEST].init(creep);
+                return;
             }
 
-            if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                moveTask(creep, source.pos);
+            if(creep.memory.harvestType === TYPE_STORAGE) {
+                var harvestObj = Game.getObjectById(creep.memory.harvestId);
+                if(!harvestObj) {
+                    console.log("Harvest storage missing!");
+                    tasks[TASK_HARVEST].init(creep);
+                    return;
+                }
+
+                if(creep.withdraw(harvestObj, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE){
+                    moveTask(creep, harvestObj.pos);
+                }
+            } else {
+                if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                    moveTask(creep, source.pos);
+                }
             }
         }
         else {
