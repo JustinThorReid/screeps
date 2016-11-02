@@ -35,15 +35,21 @@ tasks[TASK_HARVEST] = {
     init: function(creep) {
         creep.memory.subrole = TASK_HARVEST;
 
-        var roomSources = _.shuffle(roomData.getEnergySources(creep.room));
-        var sourceToUse = roomSources[0];
-
-        if(sourceToUse.storage.length) {
-            creep.memory.harvestId = sourceToUse.storage[0].id;
+        // In a storage based room, no sources or containers need to be considered
+        if(creep.room.storage) {
+            creep.memory.harvestId = creep.room.storage.id;
             creep.memory.harvestType = TYPE_STORAGE;
         } else {
-            creep.memory.harvestId = sourceToUse.id;
-            creep.memory.harvestType = TYPE_SOURCE;
+            var roomSources = _.shuffle(roomData.getEnergySources(creep.room));
+            var sourceToUse = roomSources[0];
+
+            if(sourceToUse.storage.length) {
+                creep.memory.harvestId = sourceToUse.storage[0].id;
+                creep.memory.harvestType = TYPE_STORAGE;
+            } else {
+                creep.memory.harvestId = sourceToUse.id;
+                creep.memory.harvestType = TYPE_SOURCE;
+            }
         }
     },
 

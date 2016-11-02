@@ -71,22 +71,6 @@ actions[HYBRID] = (function(){
 				collectTarget: sourceMemDat
 			});
 			console.log("Spawning new long range hybrid: " + creepName);
-		},
-		spawnHauler: function(){
-			var HAULER = [
-				{
-					body:[MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
-					energy:500
-				},
-				{
-					body:[MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
-					energy:450
-				},
-				{
-					body:[MOVE,MOVE,CARRY,CARRY,CARRY,CARRY],
-					energy:300
-				}
-				];
 		}
 	};
 })();
@@ -143,8 +127,8 @@ actions[MINER] = (function(){
 			if (source) {
 				var allObjects = source.room.lookAtArea(source.pos.y-1, source.pos.x-1, source.pos.y+1, source.pos.x+1, true);
 				var containers = _.filter(allObjects, function (a) {
-					return (a['type'] == LOOK_STRUCTURES && a.structure.structureType == STRUCTURE_CONTAINER) ||
-						(a['type'] == LOOK_CONSTRUCTION_SITES && a.constructionSite.structureType == STRUCTURE_CONTAINER);
+					return (a['type'] == LOOK_STRUCTURES && a[LOOK_STRUCTURES].structureType == STRUCTURE_CONTAINER) ||
+						(a['type'] == LOOK_CONSTRUCTION_SITES && a[LOOK_CONSTRUCTION_SITES].structureType == STRUCTURE_CONTAINER);
 				});
 
 				if(containers.length) {
@@ -218,6 +202,78 @@ actions[MINER] = (function(){
 		}
 	}
 })();
+
+actions[HAULER] = (function(){
+	var MODE_DEPOSIT_ENERGY = 0;
+	var MODE_COLLECT_ENERGY = 1;
+
+	var haulerBodiesNoWork = [
+		{
+			body:[MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
+			energy:500
+		},
+		{
+			body:[MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
+			energy:450
+		},
+		{
+			body:[MOVE,MOVE,CARRY,CARRY,CARRY,CARRY],
+			energy:300
+		}
+	];
+	var haulerBodiesWork = [{
+		body:[MOVE,MOVE,CARRY,CARRY,WORK],
+		energy:300
+	}];
+
+	var depositEnergy = function (creep) {
+		// Ran out of energy, can't deposit
+		if(creep.carry.energy == 0) {
+			creep.memory.currentTask = MODE_COLLECT_ENERGY;
+			return;
+		}
+
+		var target = Game.getObjectById(creep.memory.depositTarget.id);
+		var err = creep.transfer(target, RESOURCE_ENERGY);
+		if(err === ERR_NOT_IN_RANGE){
+			moveTask(creep, target.pos);
+		}
+	};
+	var collectEnergy = function (creep) {
+		var target = Game.getObjectById(creep.memory.collectTarget.id);
+
+		if(creep.carry.energy == creep.carryCapacity || target.store[RESOURCE_ENERGY] === 0) {
+			creep.memory.currentTask = MODE_DEPOSIT_ENERGY;
+			return;
+		}
+		if(!target || creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+			moveTask(creep, new RoomPosition(creep.memory.collectTarget.pos.x, creep.memory.collectTarget.pos.y, creep.memory.collectTarget.pos.roomName));
+		}
+	};
+
+	return {
+		run: function(creep) {
+			if(creep.memory.currentTask === MODE_DEPOSIT_ENERGY) {
+				depositEnergy(creep);
+			} else {
+				collectEnergy(creep);
+			}
+		},
+
+		// Expecting a container source/dest
+		spawnNew: function(spawner, sourceMemDat, destMemDat){
+			var body = helperFunctions.findBestBody(spawner.room, destMemDat.needsWork ? haulerBodiesWork : haulerBodiesNoWork);
+
+			var creepName = spawner.createCreep(body, undefined, {
+				role: 'LongRangeHarvester',
+				subrole: HAULER,
+				collectTarget: sourceMemDat,
+				depositTarget: destMemDat
+			});
+			console.log("Spawning hauler: " + creepName);
+		}
+	}
+})();
 // Hardcoded resource nodes
 /*
  var scoutData = {
@@ -261,13 +317,29 @@ module.exports = {
 					});
 				}
 			}
-			var sourcesNeeded = _.difference(scoutSourceIds, miningSourceIds)
+			var sourcesNeeded = _.difference(scoutSourceIds, miningSourceIds);
 			_.each(sourcesNeeded, function (sourceId) {
 				actions[MINER].spawnNew(spawner, scoutSources[sourceId]);
 			});
-			var haulingNeeded = _.difference(scoutSourceIds, haulingSourceIds)
+			var haulingNeeded = _.difference(scoutSourceIds, haulingSourceIds);
+
+			// Put into storage first, if not then room controller
+			var destOpts;
+			if(spawner.room.storage) {
+				destOpts = {
+					id:spawner.room.storage.id,
+					pos:spawner.room.storage.pos,
+					needsWork: false
+				};
+			} else {
+				destOpts = {
+					id:spawner.room.controller.id,
+					pos:spawner.room.controller.pos,
+					needsWork: true
+				};
+			}
 			_.each(haulingNeeded, function (sourceId) {
-				actions[HAULER].spawnNew(spawner, scoutSources[sourceId]);
+				actions[HAULER].spawnNew(spawner, scoutSources[sourceId], destOpts);
 			});
 
 			/*
