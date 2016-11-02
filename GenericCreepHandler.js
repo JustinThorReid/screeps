@@ -294,7 +294,9 @@ module.exports = {
                 hits:object.hits
             };
         });
-        Memory.needsRepair = _.union(Memory.needsRepair, repairList);
+        Memory.needsRepair = _.unionBy([Memory.needsRepair, repairList], function (obj) {
+            return obj.hits;
+        });
         _.sortBy(Memory.needsRepair, ['hits'])
 
         var repairObj = Game.getObjectById(Memory.needsRepair[0].id);
