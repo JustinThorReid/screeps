@@ -213,21 +213,25 @@ actions[HAULER] = (function(){
 	var MODE_DEPOSIT_ENERGY = 0;
 	var MODE_COLLECT_ENERGY = 1;
 
+	// They still have 1 work for roads
 	var haulerBodiesNoWork = [
 		{
-			body:[MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
-			energy:500
+			body:[MOVE,MOVE,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
+			energy:550
 		},
 		{
-			body:[MOVE,MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
+			body:[MOVE,MOVE,WORK,CARRY,CARRY,CARRY,CARRY,CARRY],
 			energy:450
 		},
 		{
-			body:[MOVE,MOVE,CARRY,CARRY,CARRY,CARRY],
+			body:[MOVE,WORK,CARRY,CARRY,CARRY],
 			energy:300
 		}
 	];
 	var haulerBodiesWork = [{
+		body:[MOVE,MOVE,MOVE,WORK,WORK,CARRY,CARRY,CARRY],
+		energy:500
+	},{
 		body:[MOVE,MOVE,CARRY,CARRY,WORK],
 		energy:300
 	}];

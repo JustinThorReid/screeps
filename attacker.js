@@ -9,15 +9,16 @@
 
 module.exports = {
     run: function(creep) {
-        run: function(creep) {
-            if(Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS).length){
-                var target = Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS)[0];
+        creep.moveTo(new RoomPosition(15, 2, 'E3S19'));
+
+        // Override default with chasing other creeps
+        _.each(Game.rooms, function(roomObj) {
+            if(roomObj.find(FIND_HOSTILE_CREEPS).length){
+                var target = roomObj.find(FIND_HOSTILE_CREEPS)[0];
                 if(creep.attack(target) !== 0) {
                     creep.moveTo(target.pos);
                 }
-            } else {
-                creep.moveTo(new RoomPosition(15, 2, 'E3S19'));
             }
-        }
+        });
 	}
 };
