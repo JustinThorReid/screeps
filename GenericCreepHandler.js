@@ -367,6 +367,10 @@ module.exports = {
             var repairObj = Game.getObjectById(Memory.needsRepair[0].id);
             while (Memory.needsRepair.length > 0 && (!repairObj || repairObj.hits >= Math.min(MAX_REPAIR_HITS, repairObj.hitsMax))) {
                 Memory.needsRepair.pop();
+
+                if(!Memory.needsRepair[0]) {
+                    break;
+                }
                 repairObj = Game.getObjectById(Memory.needsRepair[0].id);
             }
         }
