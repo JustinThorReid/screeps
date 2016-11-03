@@ -242,7 +242,7 @@ actions[HAULER] = (function(){
 		var target = Game.getObjectById(creep.memory.depositTarget.id);
 		var err = creep.transfer(target, RESOURCE_ENERGY);
 		if(err === ERR_NOT_IN_RANGE){
-			moveTask(creep, target.pos);
+			moveTask(creep, target.pos, false, true, true, true);
 		}
 	};
 	var collectEnergy = function (creep) {

@@ -1,7 +1,7 @@
 /**
  * Created by phatn on 10/29/2016.
  */
-module.exports = function(creep, destPos, inHurry=false, build=true, repair=true) {
+module.exports = function(creep, destPos, inHurry=false, build=true, repair=true, spawn=false) {
     // Do things while walking
     if(!inHurry && creep.carry.energy > 0) {
         var road = _.filter(creep.pos.look(), function (a) {
@@ -16,10 +16,10 @@ module.exports = function(creep, destPos, inHurry=false, build=true, repair=true
             road = road[road['type']];
 
         // Start construction
-        if(!road) {
-            //creep.pos.createConstructionSite(STRUCTURE_ROAD);
-            //creep.build(creep.pos.look(LOOK_CONSTRUCTION_SITES)[0]);
-            //return;
+        if(!road && spawn) {
+            creep.pos.createConstructionSite(STRUCTURE_ROAD);
+            creep.build(creep.pos.look(LOOK_CONSTRUCTION_SITES)[0]);
+            return;
         }
 
         // Build roads

@@ -56,8 +56,6 @@ tasks[TASK_HARVEST] = (function() {
                             return false; //break;
                         }
                     });
-                    creep.memory.harvestId = sourceToUse.storage[0].id;
-                    creep.memory.harvestType = TYPE_STORAGE;
                 }
 
                 // Default to the source itself
