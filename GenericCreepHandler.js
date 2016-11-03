@@ -197,19 +197,19 @@ tasks[TASK_DEPOSIT] = {
         creep.memory.subrole = TASK_DEPOSIT;
     },
     run: function (creep){
-        var targets = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+        var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
                     structure.energy < structure.energyCapacity;
             }
         });
 
-        if(targets.length > 0) {
-            var err = creep.transfer(targets[0], RESOURCE_ENERGY);
+        if(target) {
+            var err = creep.transfer(target, RESOURCE_ENERGY);
             if(err === ERR_NOT_IN_RANGE) {
-                moveTask(creep, targets[0].pos, false, false, false);
+                moveTask(creep, target.pos, false, false, false);
             } else if(err !== OK) {
-                console.log(creep.name + " could not transfer to " + targets[0].id);
+                console.log(creep.name + " could not transfer to " + target.id);
                 return true; // Quit task
             }
         } else {
