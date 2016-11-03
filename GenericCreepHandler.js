@@ -197,7 +197,7 @@ tasks[TASK_DEPOSIT] = {
         creep.memory.subrole = TASK_DEPOSIT;
     },
     run: function (creep){
-        var targets = creep.room.find(FIND_STRUCTURES, {
+        var targets = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
                     structure.energy < structure.energyCapacity;
@@ -317,7 +317,7 @@ module.exports = {
         // Create more creeps
         if(creeps.length <= 1) {
             var newName = Game.spawns['Spawn1'].createCreep(helperFunctions.findBestBodyImmediate(Game.spawns['Spawn1'].room, GENERIC_BODIES), undefined, {role: 'GenericWorkerCreep'});
-            console.log('Spawning new generic: ' + newName);
+            console.log('Spawning new generic NOW: ' + newName);
         } else if(creeps.length < NEEDED_CREEPS) {
             var newName = Game.spawns['Spawn1'].createCreep(helperFunctions.findBestBody(Game.spawns['Spawn1'].room, GENERIC_BODIES), undefined, {role: 'GenericWorkerCreep'});
             console.log('Spawning new generic: ' + newName);
