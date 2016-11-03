@@ -3,7 +3,7 @@
  */
 module.exports = {
     manageTowers: function(roomObj) {
-        var towers = _.filter(room.find(FIND_STRUCTURES), function (object) {
+        var towers = _.filter(roomObj.find(FIND_STRUCTURES), function (object) {
             return object.structureType == STRUCTURE_TOWER && object.energy > 0;
         });
 

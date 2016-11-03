@@ -18,15 +18,15 @@ module.exports = function(creep, destPos, inHurry=false, build=true, repair=true
         // Start construction
         if(!road && spawn) {
             if(creep.pos.createConstructionSite(STRUCTURE_ROAD) === 0) {
-                creep.build(creep.pos.look(LOOK_CONSTRUCTION_SITES)[0]);
-                return;
+                if(creep.build(creep.pos.look(LOOK_CONSTRUCTION_SITES)[0]) === 0)
+                    return;
             }
         }
 
         // Build roads
         else if(build && road instanceof ConstructionSite) {
-            creep.build(road);
-            return;
+            if(creep.build(road) === 0)
+                return;
         }
 
         // Repair road
