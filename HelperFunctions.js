@@ -30,6 +30,18 @@ module.exports = {
         return body;
     },
 
+    findBestBodyImmediate: function(room, bodyList) {
+        var body = [];
+        var cap = room.energyAvailable;
+        for (var i = 0; i < bodyList.length; i++) {
+            body = bodyList[i].body;
+            if (cap >= bodyList[i].energy)
+                break;
+        }
+
+        return body;
+    },
+
     // pos must just have x and y
     findContainersAroundPos: function(room, pos){
         return _.filter(room.lookForAtArea(LOOK_STRUCTURES, pos.y-1, pos.x-1, pos.y+1, pos.x+1, true), function(obj){

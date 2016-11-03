@@ -19,6 +19,9 @@ var TYPE_STORAGE = "TYPE_STORAGE";
 var TYPE_SOURCE = "TYPE_SOURCE";
 
 var GENERIC_BODIES = [{
+    body:[MOVE,MOVE,MOVE,MOVE,MOVE,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
+    energy:950
+},{
     body:[MOVE,MOVE,MOVE,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY],
     energy:800
 },{
@@ -312,7 +315,10 @@ module.exports = {
     role: 'GenericWorkerCreep',
     run: function(creeps) {
         // Create more creeps
-        if(creeps.length < NEEDED_CREEPS) {
+        if(creeps.length <= 1) {
+            var newName = Game.spawns['Spawn1'].createCreep(helperFunctions.findBestBodyImmediate(Game.spawns['Spawn1'].room, GENERIC_BODIES), undefined, {role: 'GenericWorkerCreep'});
+            console.log('Spawning new generic: ' + newName);
+        } else if(creeps.length < NEEDED_CREEPS) {
             var newName = Game.spawns['Spawn1'].createCreep(helperFunctions.findBestBody(Game.spawns['Spawn1'].room, GENERIC_BODIES), undefined, {role: 'GenericWorkerCreep'});
             console.log('Spawning new generic: ' + newName);
         }
