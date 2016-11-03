@@ -20,9 +20,9 @@ module.exports.loop = function () {
     var realRooms = Object.keys(Game.rooms);
     var roomsToAdd = realRooms; //_.difference(realRooms, scoutRooms);
     _.each(roomsToAdd, function (roomName) {
-        var scoutRoom = Memory.scoutData.rooms[roomName] || {
-            sourceDat:[]
-        };
+        var scoutRoom = Memory.scoutData.rooms[roomName] || {};
+        scoutRoom.sourceDat = [];
+
         var sources = Game.rooms[roomName].find(FIND_SOURCES);
         _.each(sources, function (sourceObj) {
             scoutRoom.sourceDat.push({
