@@ -17,9 +17,10 @@ module.exports = function(creep, destPos, inHurry=false, build=true, repair=true
 
         // Start construction
         if(!road && spawn) {
-            creep.pos.createConstructionSite(STRUCTURE_ROAD);
-            creep.build(creep.pos.look(LOOK_CONSTRUCTION_SITES)[0]);
-            return;
+            if(creep.pos.createConstructionSite(STRUCTURE_ROAD) === 0) {
+                creep.build(creep.pos.look(LOOK_CONSTRUCTION_SITES)[0]);
+                return;
+            }
         }
 
         // Build roads
