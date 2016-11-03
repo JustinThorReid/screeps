@@ -14,9 +14,18 @@ module.exports = {
            }
         });
 
+        var damagedStructures = [];
+        _.each(roomObj.find(FIND_STRUCTURES), function (object) {
+            if(object.hits < 1000) {
+                damagedStructures.push(object);
+            }
+        });
+
         _.each(towers, function(towerObj) {
             if(damagedCreeps.length) {
-                towerObj.repair(damagedCreeps[0]);
+                towerObj.heal(damagedCreeps[0]);
+            } else if(damagedStructures.length) {
+                towerObj.repair(damagedStructures[0]);
             }
         });
     }
