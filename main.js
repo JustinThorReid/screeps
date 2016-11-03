@@ -18,9 +18,9 @@ module.exports.loop = function () {
 
     var scoutRooms = Object.keys(Memory.scoutData.rooms);
     var realRooms = Object.keys(Game.rooms);
-    var roomsToAdd = _.difference(realRooms, scoutRooms);
+    var roomsToAdd = realRooms; //_.difference(realRooms, scoutRooms);
     _.each(roomsToAdd, function (roomName) {
-        var scoutRoom = {
+        var scoutRoom = Memory.scoutData.rooms[roomName] || {
             sourceDat:[]
         };
         var sources = Game.rooms[roomName].find(FIND_SOURCES);
