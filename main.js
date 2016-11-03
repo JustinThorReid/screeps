@@ -39,7 +39,7 @@ module.exports.loop = function () {
     manageTowers.manageTowers(Game.spawns.Spawn1.room);
 
     var attackers = _.filter(Game.creeps, (creep) => creep.memory.role == 'attacker');
-    if(attackers.length < 3) {
+    if(attackers.length < 2) {
         var newName = Game.spawns['Spawn1'].createCreep([MOVE,MOVE,MOVE,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK,ATTACK], undefined, {role: 'attacker'});
         console.log('Spawning new attacker: ' + newName);
     }
