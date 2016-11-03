@@ -56,10 +56,6 @@ module.exports = {
                     console.log(creepObj.name + " could not claim " + roomObj.name);
                 }
             }
-
-            if(creepObj.memory.targetRoom === roomName) {
-                creepsTargeted += 1;
-            }
         });
 
     }
