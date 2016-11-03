@@ -2,6 +2,7 @@ var genericCreepHandler = require("GenericCreepHandler");
 var longRangeHarvester = require('LongRangeHarvester');
 var roleAttacker = require('attacker');
 var manageTowers = require('TowerHandler');
+var claimHandler = require('ClaimHandler');
 
 module.exports.loop = function () {
 	// Old memory cleanup
@@ -33,7 +34,8 @@ module.exports.loop = function () {
 
         Memory.scoutData.rooms[roomName] = scoutRoom;
     });
-	
+
+    claimHandler.manageClaims();
 	longRangeHarvester.manageLongRangeCreeps();
     genericCreepHandler.run(_.filter(Game.creeps, (creep) => creep.memory.role == genericCreepHandler.role));
     manageTowers.manageTowers(Game.spawns.Spawn1.room);

@@ -6,7 +6,7 @@ var moveTask = require("task.move");
 var roomData = require("RoomDat");
 
 var NEEDED_CREEPS = 4;
-var MAX_REPAIR_HITS = 200000;
+var MAX_REPAIR_HITS = 300000;
 
 var TASK_HARVEST = "TASK_HARVEST";
 var TASK_UPGRADING = "TASK_UPGRADING";
