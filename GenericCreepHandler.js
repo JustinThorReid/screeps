@@ -13,6 +13,7 @@ var TASK_UPGRADING = "TASK_UPGRADING";
 var TASK_REPAIR = "TASK_REPAIR";
 var TASK_BUILD = "TASK_BUILD";
 var TASK_DEPOSIT = "TASK_DEPOSIT";
+var TASK_REFILL = "TASK_REFILL";
 
 var TYPE_STORAGE = "TYPE_STORAGE";
 var TYPE_SOURCE = "TYPE_SOURCE";
@@ -213,6 +214,34 @@ tasks[TASK_DEPOSIT] = {
     count: 0
 };
 
+tasks[TASK_REFILL] = {
+    init: function (creep) {
+        creep.memory.subrole = TASK_REFILL;
+    },
+    run: function (creep){
+        var targets = creep.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return structure.structureType == STRUCTURE_TOWER && structure.energy < structure.energyCapacity;
+            }
+        });
+
+        if(targets.length > 0) {
+            if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                moveTask(creep, targets[0].pos, false, false, false);
+            }
+        } else {
+            creep.memory.subrole = undefined;
+            return true; // Done with task
+        }
+
+        if(creep.carry.energy == 0) {
+            creep.memory.subrole = undefined;
+            return true; // Done with task
+        }
+    },
+    count: 0
+};
+
 // Focus on building first, then upgrading
 // Keep spawner filled first, then repair
 
@@ -238,7 +267,7 @@ assign rest to upgrade
 
  */
 
-function findTask(creep) {
+function findTask(creep, nonSpawnRefillList) {
     if(creep.carry.energy == 0) {
         return TASK_HARVEST;
     }
@@ -254,6 +283,10 @@ function findTask(creep) {
         if(creep.room.energyAvailable + inRoute < creep.room.energyCapacityAvailable){
             return TASK_DEPOSIT;
         }
+    }
+
+    if(nonSpawnRefillList.length > tasks[TASK_REFILL].count) {
+        return TASK_REFILL;
     }
 
     if(Memory.needsRepair.length > tasks[TASK_REPAIR].count) {
@@ -278,11 +311,18 @@ module.exports = {
 
         // Build lists
         var spawnStorageList = [],
-            repairList = [];
+            repairList = [],
+            refillList = [];
         _.each(Game.spawns['Spawn1'].room.find(FIND_STRUCTURES), function (object) {
            if((object.structureType == STRUCTURE_EXTENSION || object.structureType == STRUCTURE_SPAWN) && object.energy < object.energyCapacity) {
                spawnStorageList.push(object);
-           } else if(object.hits < Math.min(MAX_REPAIR_HITS, object.hitsMax) / 2.5) {
+           }
+
+           if(object.structureType == STRUCTURE_TOWER && object.energy < object.energyCapacity){
+               refillList.push(object);
+           }
+
+           if(object.hits < Math.min(MAX_REPAIR_HITS, object.hitsMax) / 2.5) {
                repairList.push(object);
            }
         });
@@ -347,7 +387,7 @@ module.exports = {
 
         // Assign jobs
         _.each(untaskedCreeps, function(creep) {
-            var subrole = findTask(creep);
+            var subrole = findTask(creep, refillList);
 
             tasks[subrole].count++;
             tasks[subrole].init(creep);
