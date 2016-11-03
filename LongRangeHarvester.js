@@ -216,8 +216,8 @@ actions[HAULER] = (function(){
 	// They still have 1 work for roads
 	var haulerBodiesNoWork = [
 		{
-			body:[MOVE,MOVE,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY],
-			energy:550
+			body:[MOVE,MOVE,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE],
+			energy:500
 		},
 		{
 			body:[MOVE,MOVE,WORK,CARRY,CARRY,CARRY,CARRY,CARRY],
