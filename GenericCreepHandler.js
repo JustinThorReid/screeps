@@ -51,7 +51,7 @@ tasks[TASK_HARVEST] = (function() {
                     _.each(sourceToUse.storage, function (storageDat) {
                         var storageObj = Game.getObjectById(storageDat.id);
 
-                        if(storageObj.store[RESOURCE_ENERGY] > 0) {
+                        if(storageObj && storageObj.store[RESOURCE_ENERGY] > 0) {
                             creep.memory.harvestId = storageDat.id;
                             creep.memory.harvestType = TYPE_STORAGE;
                             return false; //break;
@@ -86,13 +86,12 @@ tasks[TASK_HARVEST] = (function() {
                         moveTask(creep, harvestObj.pos);
                     }
                 } else {
-                    if (creep.harvest(harvestObj) == ERR_NOT_IN_RANGE) {
+                    if (creep.harvest(harvestObj) === ERR_NOT_IN_RANGE) {
                         moveTask(creep, harvestObj.pos);
                     }
                 }
             }
             else {
-                creep.memory.subrole = undefined;
                 return true; // Done with task
             }
         },
@@ -106,7 +105,6 @@ tasks[TASK_UPGRADING] = {
     },
     run: function (creep) {
         if(creep.carry.energy === 0){
-            creep.memory.subrole = undefined;
             return true; // Done with task
         } else if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
             moveTask(creep, creep.room.controller.pos, creep.room.controller.ticksToDowngrade < 2500);
@@ -123,11 +121,14 @@ tasks[TASK_REPAIR] = {
         var repairObj = Memory.needsRepair[0] && Game.getObjectById(Memory.needsRepair[0].id);
 
         if(!repairObj || creep.carry.energy == 0) {
-            creep.memory.subrole = undefined;
             return true; // Done with task
         } else {
-            if (creep.repair(repairObj) == ERR_NOT_IN_RANGE) {
+            var err = creep.repair(repairObj);
+            if (err == ERR_NOT_IN_RANGE) {
                 creep.moveTo(repairObj);
+            } else if(err !== OK) {
+                console.log(creep.name + " could not repair " + repairObj.id);
+                return true; // Done with task
             }
         }
     },
@@ -170,15 +171,18 @@ tasks[TASK_BUILD] = {
     run: function (creep){
         var target = Game.getObjectById(Memory.highestPriorityConstructionId);
         if(target && target instanceof ConstructionSite && creep.carry.energy > 0) {
-            if(creep.build(target) == ERR_NOT_IN_RANGE) {
+            var err = creep.build(target);
+            if(err === ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
+            } else if(err !== OK) {
+                console.log(creep.name + " could not build " + target.id);
+                return true; // Quit task
             }
         } else {
             if(!target || !(target instanceof ConstructionSite)){
                 Memory.highestPriorityConstructionId = undefined;
             }
 
-            creep.memory.subrole = undefined;
             return true; // Done with task
         }
     },
@@ -198,16 +202,18 @@ tasks[TASK_DEPOSIT] = {
         });
 
         if(targets.length > 0) {
-            if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            var err = creep.transfer(targets[0], RESOURCE_ENERGY);
+            if(err === ERR_NOT_IN_RANGE) {
                 moveTask(creep, targets[0].pos, false, false, false);
+            } else if(err !== OK) {
+                console.log(creep.name + " could not transfer to " + targets[0].id);
+                return true; // Quit task
             }
         } else {
-            creep.memory.subrole = undefined;
             return true; // Done with task
         }
 
         if(creep.carry.energy == 0) {
-            creep.memory.subrole = undefined;
             return true; // Done with task
         }
     },
@@ -226,16 +232,18 @@ tasks[TASK_REFILL] = {
         });
 
         if(targets.length > 0) {
-            if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            var err = creep.transfer(targets[0], RESOURCE_ENERGY);
+            if(err === ERR_NOT_IN_RANGE) {
                 moveTask(creep, targets[0].pos, false, false, false);
+            } else if(err !== OK) {
+                console.log(creep.name + "could not refill " + targets[0].id);
+                return true; //Quit task
             }
         } else {
-            creep.memory.subrole = undefined;
             return true; // Done with task
         }
 
         if(creep.carry.energy == 0) {
-            creep.memory.subrole = undefined;
             return true; // Done with task
         }
     },
@@ -376,6 +384,7 @@ module.exports = {
 
             if(subrole) {
                 if(tasks[subrole].run(creep)){
+                    creep.memory.subrole = undefined;
                     untaskedCreeps.push(creep);
                 } else {
                     tasks[subrole].count++;
