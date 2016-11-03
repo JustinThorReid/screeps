@@ -36,7 +36,7 @@ module.exports.loop = function () {
 	
 	longRangeHarvester.manageLongRangeCreeps();
     genericCreepHandler.run(_.filter(Game.creeps, (creep) => creep.memory.role == genericCreepHandler.role));
-    manageTowers.manageTowers();
+    manageTowers.manageTowers(Game.spawns.Spawn1.room);
 
     var attackers = _.filter(Game.creeps, (creep) => creep.memory.role == 'attacker');
     if(attackers.length < 3) {
