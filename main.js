@@ -5,7 +5,7 @@ var manageTowers = require('TowerHandler');
 var claimHandler = require('ClaimHandler');
 
 module.exports.loop = function () {
-	// Old memory cleanup
+    // Old memory cleanup
     for(var name in Memory.creeps) {
         if(!Game.creeps[name]) {
             delete Memory.creeps[name];
